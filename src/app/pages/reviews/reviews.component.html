@@ -1,0 +1,90 @@
+<!-- WRITE A REVIEW SECTION -->
+<div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+  <h3 class="text-xl font-serif mb-6">Write a Review</h3>
+  <p class="text-gray-600 text-sm mb-6">Share your experience with Red Kango</p>
+
+  <form (submit)="submitReview($event)" class="space-y-6">
+
+    <!-- Your Name -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+        <input
+          type="text"
+          [(ngModel)]="newReview.name"
+          name="name"
+          required
+          class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-700" />
+      </div>
+    </div>
+
+    <!--  NEW: What Are You Rating? -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">I’m rating</label>
+        <select [(ngModel)]="newReview.targetType" name="targetType"
+          class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-700">
+          <option value="">Select</option>
+          <option value="product">A Product</option>
+          <option value="service">A Service</option>
+        </select>
+      </div>
+
+      <!--  If product chosen -->
+      <div *ngIf="newReview.targetType === 'product'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+        <input [(ngModel)]="newReview.productName" name="productName"
+          class="w-full border border-gray-300 rounded px-4 py-2"
+          placeholder="Enter product name" />
+      </div>
+
+      <!-- ⭐ If service chosen -->
+      <div *ngIf="newReview.targetType === 'service'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Service</label>
+        <select [(ngModel)]="newReview.service" name="service"
+          class="w-full border border-gray-300 rounded px-4 py-2">
+          <option value="">Select Service</option>
+          <option value="Tent Rental">Tent Rental</option>
+          <option value="Equipment Purchase">Equipment Purchase</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- UPDATED STAR RATING WITH TOGGLE -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+      <div class="flex gap-2">
+        <button
+          *ngFor="let star of [1,2,3,4,5]"
+          type="button"
+          (click)="toggleStar(star)"
+          class="text-3xl transition-colors"
+          [class.text-green-700]="star <= newReview.rating"
+          [class.text-gray-300]="star > newReview.rating">
+          ★
+        </button>
+      </div>
+    </div>
+
+    <!-- Review Comment -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+      <textarea
+        [(ngModel)]="newReview.review"
+        name="review"
+        required
+        rows="5"
+        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-700"
+        placeholder="Tell us about your experience...">
+      </textarea>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit"
+      class="w-full bg-green-700 text-white py-3 rounded font-semibold hover:bg-green-800 transition-colors">
+      Submit
+    </button>
+
+  </form>
+</div>

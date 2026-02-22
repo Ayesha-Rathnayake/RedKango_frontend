@@ -1,0 +1,256 @@
+
+
+<!-- HERO -->
+<section class="relative h-[500px] bg-cover bg-center"
+  style="background-image:url('images/hero1copy.png')">
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+    <div class="text-white max-w-xl">
+      <span class="bg-green-700 px-3 py-1 rounded-full text-sm">
+        New Adventures Start Here
+      </span>
+
+      <h2 class="text-4xl font-serif mt-4 leading-tight">
+        Experience Nature<br />with Red Kango
+      </h2>
+
+      <p class="mt-4 text-sm">
+        Premium tent rentals, quality camping equipment, and unforgettable
+        campsite experiences in Sri Lanka.
+      </p>
+<!-- HERO BUTTON FIX -->
+<button
+  routerLink="/rentals"
+  class="mt-6 bg-green-700 px-6 py-2 rounded hover:bg-green-800 transition">
+  Rent a Tent
+</button>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-serif mb-4">Our Services</h2>
+    <p class="text-gray-600 mb-10">
+      Everything you need for a perfect camping experience
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Service 1 -->
+      <div class="bg-white p-8 rounded-lg shadow">
+        <img src="/images/service1.png" class="h-14 mx-auto mb-4" />
+        <h3 class="font-semibold text-lg">Tent Rentals</h3>
+        <p class="text-sm text-gray-600 mt-2">
+          Comfortable and durable tents for all group sizes.
+        </p>
+      </div>
+
+      <!-- Service 2 -->
+      <div class="bg-white p-8 rounded-lg shadow">
+        <img src="/images/service2.png" class="h-14 mx-auto mb-4" />
+        <h3 class="font-semibold text-lg">Camping Shop</h3>
+        <p class="text-sm text-gray-600 mt-2">
+          High-quality camping equipment and accessories.
+        </p>
+      </div>
+
+      <!-- Service 3 -->
+      <div class="bg-white p-8 rounded-lg shadow">
+        <img src="/images/service3.png" class="h-14 mx-auto mb-4" />
+        <h3 class="font-semibold text-lg">Camping Tips</h3>
+        <p class="text-sm text-gray-600 mt-2">
+          Expert guidance for safe and fun camping.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FEATURED TENTS -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    
+    <h2 class="text-3xl font-serif mb-4">Featured Tents</h2>
+    <p class="text-gray-600 mb-12">
+      Choose the perfect tent for your adventure
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-10">
+
+      <!-- Tent Card -->
+      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-6 relative">
+
+        <!-- Availability Badge -->
+        <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
+          Available
+        </span>
+
+        <!-- Tent Image -->
+        <div class="flex justify-center mb-4">
+          <img 
+            src="images/tent1.png" 
+            alt="Mountain Tent"
+            class="w-40 h-40 object-contain"
+          />
+        </div>
+
+        <!-- Tent Info -->
+        <h3 class="text-lg font-semibold text-center">Mountain Explorer Tent</h3>
+
+        <p class="text-sm text-gray-600 text-center mt-2">
+          Perfect for hiking and outdoor adventures.
+        </p>
+
+        <!-- Price -->
+        <p class="text-center text-green-700 font-bold text-lg mt-3">
+          Rs. 4,500 / day
+        </p>
+
+        <!-- Button -->
+        <div class="mt-5 text-center">
+          <button routerLink='/rentals' class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 transition">
+            Rent Now
+          </button>
+        </div>
+      </div>
+
+
+      <!-- Tent Card 2 -->
+      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-6 relative">
+
+        <!-- Availability Badge -->
+        <span class="absolute top-4 right-4 bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full font-medium">
+          Booked
+        </span>
+
+        <div class="flex justify-center mb-4">
+          <img 
+            src="images/tent2.png" 
+            alt="Family Tent"
+            class="w-40 h-40 object-contain"
+          />
+        </div>
+
+        <h3 class="text-lg font-semibold text-center">Family Comfort Tent</h3>
+
+        <p class="text-sm text-gray-600 text-center mt-2">
+          Spacious tent for family camping trips.
+        </p>
+
+        <p class="text-center text-green-700 font-bold text-lg mt-3">
+          Rs. 6,000 / day
+        </p>
+
+        <div class="mt-5 text-center">
+          <button class="bg-gray-400 text-white px-6 py-2 rounded cursor-not-allowed">
+            Not Available
+          </button>
+        </div>
+      </div>
+
+
+      <!-- Tent Card 3 -->
+      <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-6 relative">
+
+        <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
+          Available
+        </span>
+
+        <div class="flex justify-center mb-4">
+          <img 
+            src="images/tent3.png" 
+            alt="Luxury Tent"
+            class="w-40 h-40 object-contain"
+          />
+        </div>
+
+        <h3 class="text-lg font-semibold text-center">Luxury Glamping Tent</h3>
+
+        <p class="text-sm text-gray-600 text-center mt-2">
+          Premium comfort with modern facilities.
+        </p>
+
+        <p class="text-center text-green-700 font-bold text-lg mt-3">
+          Rs. 9,000 / day
+        </p>
+
+        <div class="mt-5 text-center">
+          <button routerLink='/rentals' class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 transition">
+            Rent Now
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-serif text-center mb-12">
+      Why Choose Red Kango?
+    </h2>
+
+    <div class="grid md:grid-cols-3 gap-10">
+      <!-- Reason 1 -->
+      <div class="flex gap-4">
+        <img src="/images/security_icon.png" class="h-12 w-12" />
+        <div>
+          <h3 class="font-semibold">Premium Quality Gear</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            We provide well-maintained, top-grade camping equipment.
+          </p>
+        </div>
+      </div>
+
+      <!-- Reason 2 -->
+      <div class="flex gap-4">
+        <img src="/images/trust_icon.png" class="h-12 w-12" />
+        <div>
+          <h3 class="font-semibold">Reliable Support</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            Friendly assistance before, during, and after your trip.
+          </p>
+        </div>
+      </div>
+
+      <!-- Reason 3 -->
+      <div class="flex gap-4">
+        <img src="/images/price.png" class="h-12 w-12" />
+        <div>
+          <h3 class="font-semibold">Affordable Pricing</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            Transparent pricing with no hidden costs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA -->
+<section class="bg-green-800 text-white py-16 text-center">
+  <h2 class="text-3xl font-serif">Ready for Your Next Adventure?</h2>
+  <p class="mt-2">Book your tent or shop for equipment today</p>
+
+  <div class="mt-6 flex justify-center gap-4">
+    <button 
+      routerLink="/rentals"
+      class="bg-yellow-600 px-6 py-2 rounded hover:bg-yellow-700 transition cursor-pointer">
+      Book Now
+    </button>
+    <button 
+      routerLink="/guides"
+      class="border px-6 py-2 rounded hover:bg-green-700 transition cursor-pointer">
+      Camping Tips
+    </button>
+  </div>
+</section>
+
+
+

@@ -1,0 +1,350 @@
+<!-- HERO -->
+<section class="relative h-[420px] bg-cover bg-center"
+  style="background-image:url('images/hero3.png')">
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+    <div class="text-white">
+      <h1 class="text-4xl font-serif">Equipment Shop</h1>
+      <p class="text-sm mt-2">
+        Premium camping gear and equipment for your outdoor adventures
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH & FILTERS -->
+<section class="bg-gray-100 py-10">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="bg-white p-6 rounded shadow grid md:grid-cols-4 gap-4">
+      
+      <!-- Search -->
+      <div class="md:col-span-1">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="filterProducts()"
+          placeholder="Search equipment..."
+          class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700" />
+      </div>
+
+      <!-- Category Filter -->
+      <div>
+        <select 
+          [(ngModel)]="selectedCategory" 
+          (change)="filterProducts()"
+          class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700">
+          <option value="all">All Categories</option>
+          <option value="cooking">Cooking</option>
+          <option value="lighting">Lighting</option>
+          <option value="shelter">Shelter</option>
+          <option value="tools">Tools</option>
+          <option value="clothing">Clothing</option>
+        </select>
+      </div>
+
+      <!-- Sort -->
+      <div>
+        <select 
+          [(ngModel)]="sortBy" 
+          (change)="sortProducts()"
+          class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700">
+          <option value="default">Sort By</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="name">Name: A to Z</option>
+          <option value="rating">Rating</option>
+        </select>
+      </div>
+
+      <!-- Cart Button -->
+      <button
+        (click)="toggleCart()"
+        class="bg-green-700 text-white py-2 rounded hover:bg-green-800 flex items-center justify-center gap-2 relative">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        Cart
+        <span *ngIf="cartItems.length > 0" 
+              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
+          {{ cartItems.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Active Filters -->
+    <div *ngIf="searchTerm || selectedCategory !== 'all'" 
+         class="mt-4 flex gap-2 flex-wrap items-center">
+      <span class="text-sm font-semibold text-gray-600">Active Filters:</span>
+      
+      <span *ngIf="searchTerm" 
+            class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+        Search: {{ searchTerm }}
+        <button (click)="clearSearch()" class="text-green-700 hover:text-green-900">×</button>
+      </span>
+      
+      <span *ngIf="selectedCategory !== 'all'" 
+            class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+        {{ selectedCategory }}
+        <button (click)="clearCategory()" class="text-green-700 hover:text-green-900">×</button>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS GRID -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Products -->
+    <div *ngIf="filteredProducts.length > 0" 
+         class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+      
+      <div *ngFor="let product of filteredProducts"
+           class="bg-white rounded shadow hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
+        
+        <!-- Product Image & Badge -->
+        <div class="relative h-48 bg-gray-100 overflow-hidden">
+          <img [src]="product.image" 
+               [alt]="product.name"
+               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          
+          <span *ngIf="product.badge"
+                class="absolute top-2 left-2 text-xs px-3 py-1 rounded-full font-semibold"
+                [ngClass]="{
+                  'bg-red-500 text-white': product.badge === 'Best Seller',
+                  'bg-green-600 text-white': product.badge === 'Available',
+                  'bg-gray-400 text-white': product.badge === 'Out of Stock'
+                }">
+            {{ product.badge }}
+          </span>
+
+          <!-- Quick View Button (shown on hover) -->
+          <button
+            (click)="quickView(product)"
+            class="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 px-4 py-2 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-semibold hover:bg-gray-100">
+            Quick View
+          </button>
+        </div>
+
+        <!-- Product Info -->
+        <div class="p-4">
+          <h3 class="font-semibold text-gray-800 mb-2">{{ product.name }}</h3>
+          
+          <!-- Rating -->
+          <div class="flex items-center gap-2 mb-3">
+            <div class="flex">
+              <span *ngFor="let star of [1,2,3,4,5]"
+                    [class]="star <= product.rating ? 'text-yellow-400' : 'text-gray-300'">
+                ★
+              </span>
+            </div>
+            <span class="text-xs text-gray-500">({{ product.reviews }})</span>
+          </div>
+
+          <!-- Price & Button -->
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500">LKR</p>
+              <p class="text-xl font-bold text-green-700">{{ product.price }}</p>
+            </div>
+            
+            <button
+              (click)="addToCart(product)"
+              [disabled]="!product.inStock"
+              class="px-4 py-2 rounded text-sm font-semibold transition-colors"
+              [ngClass]="product.inStock 
+                ? 'bg-green-700 text-white hover:bg-green-800' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'">
+              {{ product.inStock ? 'Add to Cart' : 'Out of Stock' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="filteredProducts.length === 0" 
+         class="text-center py-16">
+      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <h3 class="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
+      <p class="text-gray-500">Try adjusting your filters or search terms</p>
+    </div>
+  </div>
+</section>
+
+<!-- CART SIDEBAR -->
+<div *ngIf="isCartOpen" 
+     class="fixed inset-0 z-50 overflow-hidden">
+  
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50" 
+       (click)="toggleCart()"></div>
+
+  <!-- Sidebar -->
+  <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b">
+      <h2 class="text-2xl font-serif">Shopping Cart</h2>
+      <button (click)="toggleCart()" 
+              class="text-gray-500 hover:text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="flex-1 overflow-y-auto p-6">
+      
+      <!-- Empty Cart -->
+      <div *ngIf="cartItems.length === 0" 
+           class="flex flex-col items-center justify-center h-full text-gray-400">
+        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <p class="text-lg">Your cart is empty</p>
+      </div>
+
+      <!-- Cart Items List -->
+      <div *ngIf="cartItems.length > 0" class="space-y-4">
+        <div *ngFor="let item of cartItems" 
+             class="flex gap-4 p-4 border rounded">
+          
+          <img [src]="item.image" 
+               [alt]="item.name"
+               class="w-20 h-20 object-cover rounded" />
+          
+          <div class="flex-1">
+            <h4 class="font-semibold text-gray-800 mb-1">{{ item.name }}</h4>
+            <p class="text-green-700 font-bold mb-2">LKR {{ item.price }}</p>
+            
+            <!-- Quantity Controls -->
+            <div class="flex items-center gap-3">
+              <button 
+                (click)="decrementQuantity(item)"
+                class="w-7 h-7 border rounded flex items-center justify-center hover:bg-gray-100">
+                -
+              </button>
+              <span class="font-semibold">{{ item.quantity }}</span>
+              <button 
+                (click)="incrementQuantity(item)"
+                class="w-7 h-7 border rounded flex items-center justify-center hover:bg-gray-100">
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Remove Button -->
+          <button 
+            (click)="removeFromCart(item)"
+            class="text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="cartItems.length > 0" 
+         class="border-t p-6 space-y-4">
+      
+      <!-- Total -->
+      <div class="flex justify-between text-lg font-semibold">
+        <span>Total:</span>
+        <span class="text-green-700">LKR {{ getCartTotal() }}</span>
+      </div>
+
+      <!-- Checkout Button -->
+      <button
+        (click)="checkout()"
+        class="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 font-semibold">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK VIEW MODAL -->
+<div *ngIf="selectedProduct" 
+     class="fixed inset-0 z-50 overflow-y-auto">
+  
+  <!-- Overlay -->
+  <div class="fixed inset-0 bg-black/70" 
+       (click)="closeQuickView()"></div>
+
+  <!-- Modal Content -->
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div class="relative bg-white rounded-lg max-w-4xl w-full mx-auto shadow-2xl">
+      
+      <!-- Close Button -->
+      <button 
+        (click)="closeQuickView()"
+        class="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Modal Grid -->
+      <div class="grid md:grid-cols-2 gap-8 p-8">
+        
+        <!-- Image -->
+        <div>
+          <img [src]="selectedProduct.image" 
+               [alt]="selectedProduct.name"
+               class="w-full rounded-lg" />
+        </div>
+
+        <!-- Details -->
+        <div class="space-y-4">
+          <span *ngIf="selectedProduct.badge"
+                class="inline-block text-xs px-3 py-1 rounded-full font-semibold bg-green-600 text-white">
+            {{ selectedProduct.badge }}
+          </span>
+
+          <h2 class="text-3xl font-serif">{{ selectedProduct.name }}</h2>
+
+          <!-- Rating -->
+          <div class="flex items-center gap-2">
+            <div class="flex">
+              <span *ngFor="let star of [1,2,3,4,5]"
+                    [class]="star <= selectedProduct.rating ? 'text-yellow-400' : 'text-gray-300'">
+                ★
+              </span>
+            </div>
+            <span class="text-sm text-gray-500">({{ selectedProduct.reviews }} reviews)</span>
+          </div>
+
+          <p class="text-sm text-gray-600">Category: <span class="capitalize">{{ selectedProduct.category }}</span></p>
+
+          <div class="text-3xl font-bold text-green-700">LKR {{ selectedProduct.price }}</div>
+
+          <p class="text-gray-600 leading-relaxed">
+            High-quality camping equipment designed for outdoor enthusiasts. 
+            Durable, reliable, and perfect for your next adventure.
+          </p>
+
+          <button
+            (click)="addToCart(selectedProduct); closeQuickView()"
+            [disabled]="!selectedProduct.inStock"
+            class="w-full py-3 rounded font-semibold text-lg transition-colors"
+            [ngClass]="selectedProduct.inStock 
+              ? 'bg-green-700 text-white hover:bg-green-800' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'">
+            {{ selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

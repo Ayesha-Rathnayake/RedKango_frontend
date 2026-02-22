@@ -1,0 +1,136 @@
+<header class="bg-white shadow fixed top-0 left-0 w-full z-50">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+
+    <!-- LOGO -->
+    <a routerLink="/" class="flex items-center">
+      <img src="images/logo1.png" alt="Red Kango Logo" class="h-14 w-auto" />
+    </a>
+
+    <!-- DESKTOP NAV -->
+    <nav class="hidden md:flex gap-8 text-sm font-medium">
+      <a routerLink="/" routerLinkActive="text-green-700"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="hover:text-green-700 transition">Home</a>
+
+      <a routerLink="/rentals" routerLinkActive="text-green-700"
+         class="hover:text-green-700 transition">Rentals</a>
+
+      <a routerLink="/shop" routerLinkActive="text-green-700"
+         class="hover:text-green-700 transition">Shop</a>
+
+      <a routerLink="/guides" routerLinkActive="text-green-700"
+         class="hover:text-green-700 transition">Camping Tips</a>
+
+      <a routerLink="/reviews" routerLinkActive="text-green-700"
+         class="hover:text-green-700 transition">Reviews</a>
+    </nav>
+
+    <!-- RIGHT SIDE -->
+    <div class="hidden md:flex items-center gap-5">
+
+      <!-- IF NOT LOGGED IN -->
+      <div *ngIf="!isLoggedIn" class="flex gap-3">
+        <a routerLink="/login"
+           class="px-4 py-1 border border-green-700 text-green-700 rounded-md hover:bg-green-50 transition">
+           Login
+        </a>
+
+        <a routerLink="/signup"
+           class="px-4 py-1 bg-green-700 text-white rounded-md hover:bg-green-800 transition">
+           Sign Up
+        </a>
+      </div>
+
+      <!-- IF LOGGED IN -->
+      <div *ngIf="isLoggedIn" class="flex items-center gap-4">
+
+        <!-- CART -->
+        <div routerLink="/cart"
+             class="relative p-2 rounded-full hover:bg-green-100 transition cursor-pointer">
+
+          <svg xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24"
+               fill="currentColor"
+               class="h-6 w-6 text-gray-700">
+            <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.386 0 .725.266.815.642l.383 1.533 2.068 8.272a2.25 2.25 0 002.182 1.703h7.09a2.25 2.25 0 002.182-1.703l1.355-5.42a.75.75 0 00-.728-.927H6.21l-.273-1.09h13.563a.75.75 0 000-1.5H5.552l-.41-1.642A2.25 2.25 0 003.636 2.25H2.25z"/>
+          </svg>
+
+          <span *ngIf="cartCount > 0"
+                class="absolute -top-1 -right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+            {{ cartCount }}
+          </span>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="relative">
+
+          <button (click)="toggleProfile()"
+                  class="p-2 rounded-full hover:bg-green-100 transition">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24"
+                 fill="currentColor"
+                 class="h-7 w-7 text-gray-700">
+              <path fill-rule="evenodd"
+                    d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.75 20.25a8.25 8.25 0 1116.5 0 .75.75 0 01-.75.75H4.5a.75.75 0 01-.75-.75z"
+                    clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <!-- DROPDOWN -->
+          <div *ngIf="profileOpen"
+               class="absolute right-0 mt-3 w-48 bg-white border rounded-xl shadow-lg py-2 z-50">
+
+            <a routerLink="/customer"
+               (click)="profileOpen=false"
+               class="block px-4 py-2 hover:bg-green-50 transition">
+               My Profile
+            </a>
+
+            <button (click)="onLogout()"
+                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition">
+               Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MOBILE MENU BUTTON -->
+    <button class="md:hidden text-green-700 text-2xl"
+            (click)="toggleMenu()">☰</button>
+
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div *ngIf="menuOpen"
+       class="md:hidden bg-white border-t px-6 py-4 space-y-3">
+
+    <a routerLink="/" (click)="toggleMenu()" class="block">Home</a>
+    <a routerLink="/rentals" (click)="toggleMenu()" class="block">Rentals</a>
+    <a routerLink="/shop" (click)="toggleMenu()" class="block">Shop</a>
+    <a routerLink="/guides" (click)="toggleMenu()" class="block">Camping Tips</a>
+    <a routerLink="/reviews" (click)="toggleMenu()" class="block">Reviews</a>
+
+    <div class="pt-4 border-t space-y-2" *ngIf="!isLoggedIn">
+      <a routerLink="/login" class="block">Login</a>
+      <a routerLink="/signup"
+         class="block bg-green-700 text-white text-center py-2 rounded">
+         Sign Up
+      </a>
+    </div>
+
+    <div class="pt-4 border-t space-y-2" *ngIf="isLoggedIn">
+      <a routerLink="/cart" class="block">Cart</a>
+      <a routerLink="/customer" class="block">My Profile</a>
+
+      <button (click)="onLogout()"
+              class="w-full bg-red-600 text-white py-2 rounded">
+        Logout
+      </button>
+    </div>
+  </div>
+</header>

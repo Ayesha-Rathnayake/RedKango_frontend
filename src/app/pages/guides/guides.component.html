@@ -1,0 +1,129 @@
+<!-- HERO -->
+<section
+  class="relative h-[420px] bg-cover bg-center"
+  style="background-image:url('images/hero4.png')"
+>
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+    <div class="text-white">
+      <h1 class="text-4xl font-serif font-semibold">Camping Tips & Guides</h1>
+      <p class="text-sm mt-2 opacity-90">
+        Expert advice, tips, and guides for an unforgettable outdoor adventure.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- PAGE WRAPPER FOR CONSISTENCY -->
+<section class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-6 space-y-20">
+
+
+    <!-- STATIC GUIDE BLOCK -->
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <!-- IMAGE -->
+      <div class="rounded-xl overflow-hidden shadow-lg">
+        <img src="images/guides/camping-sri-lanka.jpg"
+             class="w-full h-[380px] object-cover"
+        />
+      </div>
+
+      <!-- CONTENT -->
+      <div class="space-y-4">
+        <h2 class="text-3xl font-serif text-gray-900 leading-tight">
+          Complete Guide to Camping in Sri Lanka
+        </h2>
+        <p class="text-gray-600 leading-relaxed text-[15px]">
+          Discover Sri Lanka’s most scenic locations, safe camping sites,
+          and essential preparation tips.
+        </p>
+        <button
+          class="px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 shadow transition">
+          Read More
+        </button>
+      </div>
+    </div>
+
+
+
+    <!-- ⭐ DYNAMIC VIDEO + IMAGE BLOCKS -->
+    <ng-container *ngFor="let tip of guides">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+
+        <!-- MEDIA -->
+        <div class="rounded-xl overflow-hidden shadow-lg order-2 md:order-1">
+          <ng-container [ngSwitch]="tip.type">
+
+            <!-- YouTube -->
+            <iframe
+              *ngSwitchCase="'youtube'"
+              class="w-full h-[380px] rounded-xl"
+              [src]="sanitizeYoutube(tip.url!)"
+              frameborder="0"
+              allowfullscreen>
+            </iframe>
+
+            <!-- Video -->
+            <video
+              *ngSwitchCase="'video'"
+              class="w-full h-[380px] object-cover rounded-xl"
+              controls
+              [src]="tip.url!">
+            </video>
+
+            <!-- Image -->
+            <img
+              *ngSwitchDefault
+              [src]="tip.image"
+              class="w-full h-[380px] object-cover rounded-xl" />
+          </ng-container>
+        </div>
+
+        <!-- TEXT -->
+        <div class="space-y-4 order-1 md:order-2">
+          <h2 class="text-3xl font-serif text-gray-900 leading-tight">
+            {{ tip.title }}
+          </h2>
+          <p class="text-gray-600 text-[15px] leading-relaxed">
+            {{ tip.description }}
+          </p>
+          <button
+            class="px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 shadow transition">
+            Read More
+          </button>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </div>
+</section>
+
+
+
+<!-- NEWSLETTER -->
+<section class="bg-green-700 py-20">
+  <div class="max-w-3xl mx-auto px-6 text-center text-white">
+    <h2 class="text-4xl font-serif mb-3">Stay Updated</h2>
+    <p class="mb-8 opacity-90">
+      Subscribe to our newsletter for exclusive camping guides and tips.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+      <input
+        type="email"
+        placeholder="Enter your email"
+        class="flex-1 px-4 py-3 rounded text-gray-900 focus:ring-2 focus:ring-white"
+      />
+
+      <button
+        class="bg-white text-green-700 px-6 py-3 rounded font-semibold hover:bg-gray-200">
+        Subscribe
+      </button>
+    </div>
+  </div>
+</section>
+
+

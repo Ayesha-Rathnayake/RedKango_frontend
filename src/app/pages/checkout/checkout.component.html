@@ -1,0 +1,48 @@
+<section class="py-12 bg-gray-50">
+  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 px-4">
+    <div class="md:col-span-2 space-y-6">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold">Booking Summary</h2>
+        <p class="text-sm text-gray-600 mt-1">{{ type | titlecase }} • {{ name }}</p>
+        <div class="grid sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <div class="text-sm text-gray-500">Start date</div>
+            <div class="font-medium">{{ from }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">End date</div>
+            <div class="font-medium">{{ to }}</div>
+          </div>
+        </div>
+        <div class="mt-4 text-sm text-gray-600">Nights: <span class="font-medium">{{ nights }}</span></div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="font-semibold mb-4">Price breakdown</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>LKR {{ price }} × {{ nights }} nights</span>
+            <span class="font-medium">LKR {{ subtotal }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Service fee</span>
+            <span class="font-medium">LKR {{ serviceFee }}</span>
+          </div>
+          <div class="border-t pt-2 flex justify-between text-base font-semibold">
+            <span>Total</span>
+            <span>LKR {{ total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 h-fit">
+      <h3 class="font-semibold mb-4">Payment</h3>
+      <p class="text-sm text-gray-600 mb-4">We use secure payments.</p>
+      <button (click)="pay()" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800">Pay now</button>
+      <p class="text-[12px] text-gray-500 mt-3">
+        You’ll be redirected to our payment provider. A receipt will be emailed on success.
+      </p>
+    </div>
+  </div>
+</section>
