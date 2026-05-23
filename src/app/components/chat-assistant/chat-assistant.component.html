@@ -1,142 +1,165 @@
-<!-- <button
-  class="fixed bottom-6 right-6 w-14 h-14 bg-green-700 rounded-full shadow-lg
-         flex items-center justify-center hover:bg-green-800 transition z-50"
-  aria-label="Chat Assistant">
-
-  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6">
-    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-  </svg>
-
-</button> -->
-
-
-<!-- Chatbot Toggle Button (Fixed at bottom-right) -->
-<button
-  *ngIf="!isChatOpen"
-  (click)="toggleChat()"
-  class="fixed bottom-6 right-6 w-14 h-14 bg-green-700 rounded-full shadow-lg
-         flex items-center justify-center hover:bg-green-800 transition z-50"
-  aria-label="Chat Assistant">
-
-  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-6 h-6">
-    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-    <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
-  </svg>
+<!-- OPEN CHAT BUTTON -->
+<button *ngIf="!isChatOpen" (click)="toggleChat()" class="fixed bottom-5 right-5 z-50">
+  <div
+    class="w-14 h-14 rounded-full bg-gradient-to-br from-green-700 to-green-900 shadow-2xl flex items-center justify-center hover:scale-105 transition-all duration-300 border-4 border-white"
+  >
+    <i class="fa-solid fa-comments text-white text-xl"></i>
+  </div>
 </button>
 
-<!-- Chatbot Window -->
+<!-- CHAT WINDOW -->
 <div
   *ngIf="isChatOpen"
-  class="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden border border-gray-200">
-  
-  <!-- Header -->
-  <div class="bg-green-700 text-white p-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="relative">
-        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-700" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-          </svg>
+  class="fixed bottom-5 right-5 w-[350px] h-[540px] bg-white rounded-[24px] shadow-2xl overflow-hidden flex flex-col z-50 border border-gray-200"
+>
+  <!-- HEADER -->
+  <div class="bg-gradient-to-r from-green-800 to-green-600 px-4 py-3 text-white">
+    <div class="flex items-center justify-between">
+      <!-- LEFT -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+          <i class="fa-solid fa-campground text-lg"></i>
         </div>
-        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+
+        <div>
+          <h2 class="font-semibold text-lg leading-none">Red Kango AI</h2>
+
+          <p class="text-xs opacity-80 mt-1">Camping Assistant</p>
+        </div>
       </div>
-      <div>
-        <h3 class="font-semibold">Red Kango Assistant</h3>
-        <p class="text-xs text-green-100">Online - Ready to help!</p>
-      </div>
+
+      <!-- CLOSE -->
+      <button (click)="toggleChat()" class="w-8 h-8 rounded-full hover:bg-white/20 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
-    <button
-      (click)="toggleChat()"
-      class="text-white hover:bg-green-800 rounded p-1 transition-colors">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
   </div>
 
-  <!-- Messages Container -->
-  <div #messagesContainer class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-    
-    <!-- Welcome Message (Show when no messages) -->
-    <div *ngIf="messages.length === 0" class="text-center py-8">
-      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+  <!-- MESSAGES -->
+  <div #messagesContainer class="flex-1 overflow-y-auto px-4 py-4 bg-[#f7f7f7] space-y-4">
+    <!-- EMPTY STATE -->
+    <div
+      *ngIf="messages.length === 0"
+      class="h-full flex flex-col items-center justify-center text-center"
+    >
+      <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4">
+        <i class="fa-solid fa-tent text-green-700 text-3xl"></i>
       </div>
-      <h4 class="font-semibold text-gray-800 mb-2">Welcome to Red Kango!</h4>
-      <p class="text-sm text-gray-600 mb-4">How can we help you today?</p>
+
+      <h3 class="text-xl font-semibold text-gray-800">Welcome to Red Kango</h3>
+
+      <p class="text-gray-500 text-sm mt-2 max-w-[220px] leading-6">
+        Ask about camping tents, rentals and adventures.
+      </p>
+
+      <!-- SUGGESTIONS -->
+      <div class="mt-6 flex flex-wrap gap-2 justify-center">
+        <button
+          class="bg-white px-3 py-2 rounded-full shadow-sm text-xs text-gray-700 hover:bg-green-50 transition"
+        >
+          Best tents?
+        </button>
+
+        <button
+          class="bg-white px-3 py-2 rounded-full shadow-sm text-xs text-gray-700 hover:bg-green-50 transition"
+        >
+          Camping tips
+        </button>
+
+        <button
+          class="bg-white px-3 py-2 rounded-full shadow-sm text-xs text-gray-700 hover:bg-green-50 transition"
+        >
+          Family tents
+        </button>
+      </div>
     </div>
 
-    <!-- Chat Messages (Will be populated via Gemini API) -->
-    <div *ngFor="let message of messages" 
-         [ngClass]="message.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
-      
-      <!-- Bot Message -->
-      <div *ngIf="message.role === 'model'" class="flex gap-2 max-w-[80%]">
-        <div class="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-          </svg>
+    <!-- CHAT MESSAGES -->
+    <div
+      *ngFor="let msg of messages"
+      class="flex"
+      [ngClass]="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+    >
+      <!-- BOT -->
+      <div *ngIf="msg.role === 'bot'" class="flex items-end gap-2 max-w-[85%]">
+        <!-- AVATAR -->
+        <div class="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-tree text-white text-xs"></i>
         </div>
-        <div class="bg-white rounded-lg rounded-tl-none px-4 py-2 shadow-sm border border-gray-200">
-          <p class="text-sm text-gray-800">{{ message.text }}</p>
-          <span class="text-xs text-gray-400 mt-1 block">{{ message.timestamp | date:'shortTime' }}</span>
+
+        <!-- MESSAGE -->
+        <div class="bg-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100">
+          <div class="text-[13px] leading-6 text-gray-700" [innerHTML]="msg.text"></div>
+
+          <div class="text-[10px] text-gray-400 mt-1">
+            {{ msg.timestamp | date: 'shortTime' }}
+          </div>
         </div>
       </div>
 
-      <!-- User Message -->
-      <div *ngIf="message.role === 'user'" class="flex gap-2 max-w-[80%]">
-        <div class="bg-green-700 text-white rounded-lg rounded-tr-none px-4 py-2 shadow-sm">
-          <p class="text-sm">{{ message.text }}</p>
-          <span class="text-xs text-green-100 mt-1 block">{{ message.timestamp | date:'shortTime' }}</span>
+      <!-- USER -->
+      <div
+        *ngIf="msg.role === 'user'"
+        class="bg-green-700 text-white px-4 py-3 rounded-2xl rounded-br-sm max-w-[80%] shadow-sm"
+      >
+        <p class="text-[13px] leading-6 whitespace-pre-wrap">
+          {{ msg.text }}
+        </p>
+
+        <div class="text-[10px] text-green-100 mt-1 text-right">
+          {{ msg.timestamp | date: 'shortTime' }}
         </div>
       </div>
     </div>
 
-    <!-- Typing Indicator (Show when loading) -->
-    <div *ngIf="isLoading" class="flex gap-2">
-      <div class="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center shrink-0">
-        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-        </svg>
+    <!-- LOADING -->
+    <div *ngIf="isLoading" class="flex items-end gap-2">
+      <div class="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center shadow-sm">
+        <i class="fa-solid fa-tree text-white text-xs"></i>
       </div>
-      <div class="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-200">
+
+      <div class="bg-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm border">
         <div class="flex gap-1">
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-bounce"> </span>
+
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-bounce delay-150"> </span>
+
+          <span class="w-2 h-2 rounded-full bg-green-600 animate-bounce delay-300"> </span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Input Area -->
-  <div class="border-t border-gray-200 p-4 bg-white">
-    <form (submit)="sendMessage($event)" class="flex gap-2">
-      <input
-        type="text"
-        [(ngModel)]="userInput"
-        name="message"
-        placeholder="Type your message..."
-        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent"
-        [disabled]="isLoading" />
+  <!-- INPUT -->
+  <div class="p-3 bg-white border-t border-gray-100">
+    <form (submit)="sendMessage($event)" class="flex items-center gap-2">
+      <!-- INPUT -->
+      <div class="flex-1 relative">
+        <input
+          [(ngModel)]="userInput"
+          name="message"
+          type="text"
+          placeholder="Ask about camping..."
+          class="w-full bg-gray-100 rounded-full py-3 pl-4 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <!-- SEND -->
       <button
         type="submit"
         [disabled]="!userInput.trim() || isLoading"
-        class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
+        class="w-11 h-11 rounded-full bg-green-700 text-white shadow hover:bg-green-800 transition disabled:opacity-50"
+      >
+        <i class="fa-solid fa-paper-plane text-sm"></i>
       </button>
     </form>
   </div>
 </div>
 
-<!-- Mobile Overlay -->
+<!-- MOBILE OVERLAY -->
 <div
   *ngIf="isChatOpen"
   (click)="toggleChat()"
-  class="fixed inset-0 bg-black/20 z-40 md:hidden"></div>
+  class="fixed inset-0 bg-black/20 z-40 md:hidden"
+></div>

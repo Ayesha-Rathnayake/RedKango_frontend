@@ -1,0 +1,167 @@
+<!-- LOADING -->
+<div *ngIf="loading" class="min-h-screen bg-gray-50 flex items-center justify-center">
+  <svg class="animate-spin w-8 h-8 text-green-700" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+  </svg>
+</div>
+
+<!-- ERROR -->
+<div
+  *ngIf="!loading && error"
+  class="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4"
+>
+  <p class="text-red-500 text-lg">{{ error }}</p>
+  <button
+    (click)="goBack()"
+    class="text-green-700 hover:underline text-sm flex items-center gap-1"
+  >
+    ← Back to Camping Tips
+  </button>
+</div>
+
+<!-- ARTICLE -->
+<article *ngIf="!loading && !error && guide" class="bg-gray-50 min-h-screen">
+
+  <!-- Back link -->
+  <div class="max-w-5xl mx-auto px-6 pt-8">
+    <button
+      (click)="goBack()"
+      class="text-green-700 hover:underline text-sm flex items-center gap-1 mb-6"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+      Back to Camping Tips
+    </button>
+  </div>
+
+  <!-- HERO MEDIA -->
+  <div class="max-w-5xl mx-auto px-6 mb-10">
+    <div class="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+
+      <ng-container [ngSwitch]="guide.mediaType">
+
+        <!-- YouTube -->
+        <iframe
+          *ngSwitchCase="'YOUTUBE'"
+          class="w-full h-[420px]"
+          [src]="sanitizeYoutube(guide.mediaUrl)"
+          frameborder="0"
+          allowfullscreen>
+        </iframe>
+
+        <!-- Hosted video -->
+        <video
+          *ngSwitchCase="'VIDEO'"
+          class="w-full h-[420px] object-cover bg-black"
+          controls
+          [src]="sanitizeVideo(guide.mediaUrl)">
+        </video>
+
+        <!-- Image -->
+        <img
+          *ngSwitchDefault
+          [src]="guide.imageUrl || 'images/placeholder.png'"
+          [alt]="guide.title"
+          class="w-full h-[420px] object-cover"/>
+      </ng-container>
+
+    </div>
+  </div>
+
+  <!-- ARTICLE CONTENT -->
+  <div class="max-w-4xl mx-auto px-6 pb-20">
+
+    <!-- Title + meta -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-serif text-gray-900 leading-tight mb-4">
+        {{ guide.title }}
+      </h1>
+
+      <div
+        class="flex flex-wrap items-center gap-3 text-sm text-gray-500 border-b border-gray-200 pb-5"
+      >
+        <span class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+          {{ guide.author }}
+        </span>
+
+        <span>·</span>
+
+        <span class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7
+                 a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          {{ formatDate(guide.createdAt) }}
+        </span>
+
+        <span *ngIf="guide.readTime">·</span>
+
+        <span *ngIf="guide.readTime" class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          {{ guide.readTime }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <p
+      class="text-lg text-gray-600 leading-relaxed mb-8 font-medium border-l-4 border-green-700 pl-4"
+    >
+      {{ guide.summary }}
+    </p>
+
+    <!-- Full content -->
+    <div
+      *ngIf="guide.content"
+      class="prose prose-lg max-w-none text-gray-700 leading-relaxed
+             prose-headings:font-serif prose-headings:text-gray-900
+             prose-a:text-green-700 prose-a:no-underline
+             hover:prose-a:underline prose-img:rounded-xl
+             prose-strong:text-gray-900"
+      [innerHTML]="safeContent(guide.content)">
+    </div>
+
+    <!-- No content fallback -->
+    <p *ngIf="!guide.content" class="text-gray-500 italic">
+      Full article content coming soon.
+    </p>
+
+    <!-- Back button -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+      <button
+        (click)="goBack()"
+        class="px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 shadow transition font-medium"
+      >
+        ← Back to Camping Tips
+      </button>
+    </div>
+
+  </div>
+</article>

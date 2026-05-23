@@ -10,6 +10,7 @@ export type AuthResponse = {
   tokenType: 'Bearer';
   email: string;
   fullName: string;
+    roles: string[]; 
 };
 
 /** ---- Inline JWT helpers (expiry-aware isLoggedIn) ---- */
@@ -41,17 +42,19 @@ export class AuthService {
     return !!token && isJwtValid(token);
   }
 
-  private saveSession(res: AuthResponse) {
-    localStorage.setItem('accessToken', res.accessToken);
-    localStorage.setItem('refreshToken', res.refreshToken);
-    localStorage.setItem('user', JSON.stringify({ email: res.email, name: res.fullName }));
-  }
+login(email: string, password: string, rememberMe = false) {
+  return this.http
+    .post<AuthResponse>(`${this.cfg.apiBaseUrl}/api/auth/login`, { email, password, rememberMe })
+    .pipe(tap(res => this.saveSession(res)));
+}
 
-  login(email: string, password: string) {
-    return this.http
-      .post<AuthResponse>(`${this.cfg.apiBaseUrl}/api/auth/login`, { email, password })
-      .pipe(tap(res => this.saveSession(res)));
-  }
+private saveSession(res: AuthResponse) {
+  localStorage.setItem('accessToken',  res.accessToken);
+  localStorage.setItem('refreshToken', res.refreshToken);
+  localStorage.setItem('roles', JSON.stringify(res.roles ?? []));  // ← add this line
+  localStorage.setItem('user', JSON.stringify({ email: res.email, name: res.fullName }));
+}
+
 
   signup(body: { firstName: string; lastName: string; email: string; phone: string; password: string }) {
     return this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/register`, body);
@@ -81,6 +84,7 @@ export class AuthService {
   clearLocalAndRedirect(redirectToLogin = true) {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+      localStorage.removeItem('roles');
     localStorage.removeItem('user');
     if (redirectToLogin) {
       window.location.href = '/login';

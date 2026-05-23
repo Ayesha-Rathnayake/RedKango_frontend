@@ -1,47 +1,103 @@
-<footer class="bg-[#F9F7F3] border-t relative">
+<footer class="bg-[#1f1f1f] text-white border-t border-green-700/40">
+  <!-- Main Footer -->
+  <div class="max-w-7xl mx-auto px-6 py-10 text-center">
+    <!-- Social Icons -->
+    <div class="flex justify-center gap-4 mb-6">
+      <!-- WhatsApp -->
+      <a
+        href="https://wa.me/94765378422"
+        target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+      >
+        <i class="fab fa-whatsapp"></i>
+      </a>
 
-  <div class="max-w-7xl mx-auto px-6 py-12
-              grid md:grid-cols-4 gap-8 text-sm text-gray-600">
+      <!-- Facebook -->
+      <a
+        href="https://www.facebook.com/share/1D5NRgZtyT/"
+        target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+      >
+        <i class="fab fa-facebook-f"></i>
+      </a>
 
-    <div>
-      <h3 class="text-green-700 font-bold text-lg mb-3">RED KANGO</h3>
-      <p>
-        Your trusted partner for camping adventures.
-        Quality tents, equipment, and unforgettable experiences.
-      </p>
+      <!-- Instagram -->
+      <a
+        href="https://instagram.com/"
+        target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+      >
+        <i class="fab fa-instagram"></i>
+      </a>
+
+      <!-- YouTube -->
+      <a
+        href="https://www.youtube.com/@NutNKnot"
+        target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110"
+      >
+        <i class="fab fa-youtube"></i>
+      </a>
     </div>
 
-    <div>
-      <h4 class="font-semibold text-gray-800 mb-3">Quick Links</h4>
-      <ul class="space-y-2">
-        <li><a routerLink="/rentals">Rentals</a></li>
-        <li><a routerLink="/shop">Shop</a></li>
-        <li><a routerLink="/guides">Camping Tips</a></li>
-      </ul>
+    <!-- Brand -->
+    <h2 class="text-2xl font-bold text-green-500 tracking-wide mb-3">RED KANGO</h2>
+
+    <p class="max-w-lg mx-auto text-sm text-gray-300 leading-relaxed mb-8">
+      Your trusted partner for camping adventures. Quality tents, equipment, and unforgettable
+      experiences.
+    </p>
+
+    <!-- Quick Links -->
+    <div
+      class="flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm uppercase tracking-widest font-semibold mb-8"
+    >
+      <a routerLink="/rentals" class="hover:text-green-500 transition duration-300"> Rentals </a>
+
+      <a routerLink="/shop" class="hover:text-green-500 transition duration-300"> Shop </a>
+
+      <a routerLink="/camping-tips" class="hover:text-green-500 transition duration-300">
+        Camping Tips
+      </a>
+
+      <a routerLink="/reviews" class="hover:text-green-500 transition duration-300"> Reviews </a>
     </div>
 
-    <div>
-      <h4 class="font-semibold text-gray-800 mb-3">Support</h4>
-      <ul class="space-y-2">
-        <li><a routerLink="/faq">FAQs</a></li>
-        <li><a routerLink="/policy">Booking Policy</a></li>
-        <li><a routerLink="/cancel">Cancellation</a></li>
-      </ul>
-    </div>
+    <!-- Contact Info -->
+    <div
+      class="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-4 text-sm text-gray-300 text-center"
+    >
+      <!-- Phone -->
+      <a href="tel:+94765378422" class="flex items-center gap-2 hover:text-green-500 transition">
+        <i class="fas fa-phone-alt text-green-500"></i>
+        +94 76 537 8422
+      </a>
 
-    <div>
-      <h4 class="font-semibold text-gray-800 mb-3">Contact</h4>
-      <p>📞 +94 76 537 8422</p>
-      <p>✉️ info@redkango.lk</p>
-      <p>📍 Bandarawela, Sri Lanka</p>
-    </div>
+      <span class="hidden md:block text-gray-600">|</span>
 
+      <!-- Email -->
+      <a
+        href="mailto:redkango@gmail.com"
+        class="flex items-center gap-2 hover:text-green-500 transition"
+      >
+        <i class="fas fa-envelope text-green-500"></i>
+        redkango@gmail.com
+      </a>
+
+      <span class="hidden md:block text-gray-600">|</span>
+
+      <!-- Location -->
+      <span class="flex items-center gap-2">
+        <i class="fas fa-map-marker-alt text-green-500"></i>
+        Bandarawela, Sri Lanka
+      </span>
+    </div>
   </div>
 
-  <div class="border-t py-4 text-center text-xs text-gray-500">
-    © 2025 Red Kango. All rights reserved.
+  <!-- Bottom Bar -->
+  <div class="border-t border-white/10 py-4 text-center">
+    <p class="text-xs tracking-wide text-gray-400">
+      © {{ currentYear }} Red Kango. All rights reserved.
+    </p>
   </div>
-
-
-
 </footer>

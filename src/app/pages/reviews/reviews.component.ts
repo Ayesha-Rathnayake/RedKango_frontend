@@ -19,8 +19,8 @@ interface NewReview {
   name: string;
   rating: number;
   review: string;
-  targetType: '' | 'product' | 'service'; // ✅ NEW
-  productName: string;                     // ✅ NEW (required if targetType='product')
+  targetType: '' | 'product' | 'service'; //  NEW
+  productName: string;                     // NEW (required if targetType='product')
   service: string;                         //     (required if targetType='service')
 }
 
@@ -42,7 +42,7 @@ export class ReviewsComponent implements OnInit {
     1: 1
   };
 
-  // ✅ Initialize with extended fields
+  //  Initialize with extended fields
   newReview: NewReview = {
     name: '',
     rating: 0,
@@ -163,7 +163,7 @@ export class ReviewsComponent implements OnInit {
   submitReview(event: Event) {
     event.preventDefault();
 
-    // ✅ Validate common fields
+    //  Validate common fields
     if (
       !this.newReview.name ||
       !this.newReview.rating ||
@@ -174,7 +174,7 @@ export class ReviewsComponent implements OnInit {
       return;
     }
 
-    // ✅ Validate specific target selection
+    //  Validate specific target selection
     if (this.newReview.targetType === 'product' && !this.newReview.productName) {
       alert('Please specify the product name');
       return;

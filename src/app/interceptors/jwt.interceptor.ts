@@ -21,6 +21,7 @@ const AUTH_URL_FRAGMENTS = [
   '/api/auth/reset-password',
   '/api/auth/verify',
   '/api/auth/logout',
+  '/api/v1/chatbot',
 ];
 
 function isAuthUrl(url: string): boolean {

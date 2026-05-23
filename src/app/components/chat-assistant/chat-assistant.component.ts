@@ -1,21 +1,23 @@
-// import { Component } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewChecked,
+  ChangeDetectorRef
+} from '@angular/core';
 
-// @Component({
-//   selector: 'app-chat-assistant',
-//   standalone: true,
-//   templateUrl: './chat-assistant.component.html'
-// })
-// export class ChatAssistantComponent {}
-
-
-
-import { Component, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { finalize } from 'rxjs/operators';
+
+import { DomSanitizer } from '@angular/platform-browser';
+
+import { ChatbotService } from '../../services/chatbot.service';
+
 interface Message {
-  text: string;
-  role: 'user' | 'model'; // Using 'model' to match Gemini API format
+  text: any;
+  role: 'user' | 'bot';
   timestamp: Date;
 }
 
@@ -26,91 +28,224 @@ interface Message {
   templateUrl: './chat-assistant.component.html'
 })
 export class ChatAssistantComponent implements AfterViewChecked {
-  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+
+  @ViewChild('messagesContainer')
+  messagesContainer!: ElementRef;
 
   isChatOpen = false;
+
   userInput = '';
+
   isLoading = false;
+
   messages: Message[] = [];
 
-  private shouldScrollToBottom = false;
+  private shouldScroll = false;
 
-  ngAfterViewChecked() {
-    if (this.shouldScrollToBottom) {
-      this.scrollToBottom();
-      this.shouldScrollToBottom = false;
-    }
-  }
+  constructor(
+    private chatbotService: ChatbotService,
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer
+  ) {}
 
   toggleChat() {
+
     this.isChatOpen = !this.isChatOpen;
+
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
   }
 
   sendMessage(event: Event) {
-    event.preventDefault();
-    
-    if (!this.userInput.trim()) return;
 
-    // Add user message to chat
-    const userMessage: Message = {
-      text: this.userInput,
+    event.preventDefault();
+
+    const question = this.userInput.trim();
+
+    if (!question || this.isLoading) return;
+
+    // USER MESSAGE
+    this.messages.push({
+      text: question,
       role: 'user',
       timestamp: new Date()
-    };
+    });
 
-    this.messages.push(userMessage);
-    this.shouldScrollToBottom = true;
-
-    // Clear input
-    const userQuestion = this.userInput;
     this.userInput = '';
 
-    // Show loading indicator
     this.isLoading = true;
 
-    // TODO: Call Gemini API here
-    // Example structure:
-    /*
-    this.geminiService.sendMessage(userQuestion).subscribe({
-      next: (response) => {
-        const botMessage: Message = {
-          text: response.text,
-          role: 'model',
-          timestamp: new Date()
-        };
-        this.messages.push(botMessage);
-        this.isLoading = false;
-        this.shouldScrollToBottom = true;
-      },
-      error: (error) => {
-        console.error('Gemini API Error:', error);
-        this.isLoading = false;
-        // Handle error
-      }
-    });
-    */
+    this.shouldScroll = true;
 
-    // Temporary placeholder response (remove when implementing Gemini API)
+    // FORCE UI UPDATE
+    this.cdr.detectChanges();
+
     setTimeout(() => {
-      const botMessage: Message = {
-        text: 'Gemini API integration pending. This is a placeholder response.',
-        role: 'model',
-        timestamp: new Date()
-      };
-      this.messages.push(botMessage);
-      this.isLoading = false;
-      this.shouldScrollToBottom = true;
-    }, 1500);
+      this.scrollToBottom();
+    }, 100);
+
+    // API CALL
+    this.chatbotService.sendMessage(question)
+      .pipe(
+        finalize(() => {
+
+          this.isLoading = false;
+
+          // FORCE UI UPDATE
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.scrollToBottom();
+          }, 100);
+        })
+      )
+      .subscribe({
+
+        next: (response: any) => {
+
+          console.log('BOT RESPONSE:', response);
+
+          const formattedResponse =
+            this.formatBotResponse(
+              response?.resultData || 'No response received'
+            );
+
+          this.messages.push({
+          text: formattedResponse,
+            role: 'bot',
+            timestamp: new Date()
+          });
+
+          this.shouldScroll = true;
+
+          // FORCE UI REFRESH
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.scrollToBottom();
+          }, 100);
+        },
+
+        error: (error) => {
+
+          console.error('CHATBOT ERROR:', error);
+
+          this.messages.push({
+            text: 'Sorry, assistant unavailable right now.',
+            role: 'bot',
+            timestamp: new Date()
+          });
+
+          this.shouldScroll = true;
+
+          // FORCE UI REFRESH
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.scrollToBottom();
+          }, 100);
+        }
+      });
   }
 
-  private scrollToBottom(): void {
+  ngAfterViewChecked() {
+
+    if (this.shouldScroll) {
+
+      this.scrollToBottom();
+
+      this.shouldScroll = false;
+    }
+  }
+
+  private scrollToBottom() {
+
     try {
+
       if (this.messagesContainer) {
-        this.messagesContainer.nativeElement.scrollTop = 
+
+        this.messagesContainer.nativeElement.scrollTop =
           this.messagesContainer.nativeElement.scrollHeight;
       }
+
     } catch (err) {
-      console.error('Error scrolling to bottom:', err);
+
+      console.error(err);
     }
+  }
+
+  // FORMAT BOT RESPONSE
+  private formatBotResponse(text: string): string {
+
+    // BOLD TEXT
+    text = text.replace(
+      /\*\*(.*?)\*\*/g,
+      '<strong class="font-semibold">$1</strong>'
+    );
+
+    // FIX INLINE BULLETS
+    text = text.replace(/\s\*\s/g, '\n* ');
+
+    const lines = text.split('\n');
+
+    let formatted = '';
+
+    let insideList = false;
+
+    lines.forEach(line => {
+
+      const trimmed = line.trim();
+
+      // BULLET POINTS
+      if (
+        trimmed.startsWith('* ') ||
+        trimmed.startsWith('- ')
+      ) {
+
+        if (!insideList) {
+
+          formatted += `
+            <ul class="list-disc pl-5 my-3 space-y-2">
+          `;
+
+          insideList = true;
+        }
+
+        formatted += `
+          <li class="leading-7">
+            ${trimmed.substring(2)}
+          </li>
+        `;
+
+      } else {
+
+        // CLOSE LIST
+        if (insideList) {
+
+          formatted += '</ul>';
+
+          insideList = false;
+        }
+
+        // NORMAL PARAGRAPH
+        if (trimmed !== '') {
+
+          formatted += `
+            <p class="mb-3 leading-7">
+              ${trimmed}
+            </p>
+          `;
+        }
+      }
+    });
+
+    // CLOSE LAST LIST
+    if (insideList) {
+
+      formatted += '</ul>';
+    }
+
+    return formatted;
   }
 }

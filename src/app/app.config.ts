@@ -9,6 +9,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAppConfig(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([jwtInterceptor]))
+    provideHttpClient(withInterceptors([jwtInterceptor])),
+  
   ]
 };
