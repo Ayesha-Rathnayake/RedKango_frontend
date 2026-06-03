@@ -1,48 +1,100 @@
-<section class="py-12 bg-gray-50">
-  <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8 px-4">
-    <div class="md:col-span-2 space-y-6">
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold">Booking Summary</h2>
-        <p class="text-sm text-gray-600 mt-1">{{ type | titlecase }} • {{ name }}</p>
-        <div class="grid sm:grid-cols-2 gap-4 mt-4">
-          <div>
-            <div class="text-sm text-gray-500">Start date</div>
-            <div class="font-medium">{{ from }}</div>
-          </div>
-          <div>
-            <div class="text-sm text-gray-500">End date</div>
-            <div class="font-medium">{{ to }}</div>
-          </div>
-        </div>
-        <div class="mt-4 text-sm text-gray-600">Nights: <span class="font-medium">{{ nights }}</span></div>
-      </div>
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h1>
 
-      <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="font-semibold mb-4">Price breakdown</h3>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span>LKR {{ price }} × {{ nights }} nights</span>
-            <span class="font-medium">LKR {{ subtotal }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span>Service fee</span>
-            <span class="font-medium">LKR {{ serviceFee }}</span>
-          </div>
-          <div class="border-t pt-2 flex justify-between text-base font-semibold">
-            <span>Total</span>
-            <span>LKR {{ total }}</span>
-          </div>
+  <div
+    *ngIf="errorMessage"
+    class="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="cart.length === 0" class="bg-white rounded-xl shadow p-8 text-center">
+    <p class="text-gray-500 mb-4">Your cart is empty.</p>
+    <a routerLink="/shop" class="bg-green-700 text-white px-5 py-2 rounded-lg">
+      Continue Shopping
+    </a>
+  </div>
+
+  <div *ngIf="cart.length > 0" class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-semibold mb-5">Delivery Details</h2>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name *</label>
+          <input [(ngModel)]="address.fullName" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone *</label>
+          <input [(ngModel)]="address.phone" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1">Address Line 1 *</label>
+          <input [(ngModel)]="address.addressLine1" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1">Address Line 2</label>
+          <input [(ngModel)]="address.addressLine2" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">City *</label>
+          <input [(ngModel)]="address.city" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">District *</label>
+          <input [(ngModel)]="address.district" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Postal Code *</label>
+          <input [(ngModel)]="address.postalCode" class="w-full border rounded-lg px-3 py-2" />
         </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6 h-fit">
-      <h3 class="font-semibold mb-4">Payment</h3>
-      <p class="text-sm text-gray-600 mb-4">We use secure payments.</p>
-      <button (click)="pay()" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800">Pay now</button>
-      <p class="text-[12px] text-gray-500 mt-3">
-        You’ll be redirected to our payment provider. A receipt will be emailed on success.
+    <div class="bg-white rounded-xl shadow p-6 h-fit">
+      <h2 class="text-lg font-semibold mb-4">Order Summary</h2>
+
+      <div class="space-y-3 mb-4">
+        <div *ngFor="let item of cart" class="flex justify-between text-sm">
+          <span>{{ item.productName }} x {{ item.quantity }}</span>
+          <span>LKR {{ item.price * item.quantity | number }}</span>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+
+      <div class="flex justify-between mb-2">
+        <span>Subtotal</span>
+        <span>LKR {{ subtotal | number }}</span>
+      </div>
+
+      <div class="flex justify-between mb-2">
+        <span>Delivery Charge</span>
+        <span>LKR {{ deliveryCharge | number }}</span>
+      </div>
+
+      <div class="flex justify-between font-bold text-lg mt-4">
+        <span>Total</span>
+        <span>LKR {{ total | number }}</span>
+      </div>
+
+      <button
+        (click)="placeOrder()"
+        [disabled]="loading"
+        class="w-full mt-6 bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white py-3 rounded-lg font-medium"
+      >
+        {{ loading ? 'Creating Order...' : 'Place Order' }}
+      </button>
+
+      <p class="text-xs text-gray-500 mt-3 text-center">
+        Payment gateway will be connected in the next phase.
       </p>
     </div>
   </div>
-</section>
+</div>

@@ -1,105 +1,173 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  badge?: 'Best Seller' | 'Available' | 'Out of Stock';
-  category: string;
-  rating: number;   // average rating 1..5
-  reviews: number;  // number of reviews
-  inStock: boolean;
-}
+import { Product } from '../../models/product.model';
+import { ProductService } from '../../services/product.service';
+import { PurchaseCartService } from '../../services/purchase-cart.service';
+import { PurchaseCartItem } from '../../models/purchase-cart.model';
 
-interface CartItem extends Product {
-  quantity: number;
-}
+type StockLabel = 'In Stock' | 'Running Out' | 'Out of Stock';
+type SortOption = 'default' | 'price-low' | 'price-high' | 'name' | 'stock';
+type PendingAction = 'cart' | 'checkout' | null;
 
 @Component({
   selector: 'app-shop',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './shop.component.html'
+  templateUrl: './shop.component.html',
 })
-export class ShopComponent implements OnInit {
+export class ShopComponent implements OnInit, OnDestroy {
   searchTerm = '';
-  selectedCategory = 'all';
-  sortBy = 'default';
+  sortBy: SortOption = 'default';
+
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
 
   isCartOpen = false;
+  showAuthRequiredModal = false;
+  pendingAction: PendingAction = null;
+
   selectedProduct: Product | null = null;
 
-  products: Product[] = [
-    { id: 1,  name: 'Butane Gas Canister',      price:  850,  image: 'images/products/gas-canister.png',  badge: 'Best Seller', category: 'cooking',  rating: 5, reviews: 124, inStock: true },
-    { id: 2,  name: 'Waterproof Gas Stove',     price: 2600,  image: 'images/products/gas-stove.png',     badge: 'Available',   category: 'cooking',  rating: 4, reviews:  87, inStock: true },
-    { id: 3,  name: 'Hiking Rope',              price:  360,  image: 'images/products/rope.png',          badge: 'Best Seller', category: 'tools',    rating: 5, reviews: 203, inStock: true },
-    { id: 4,  name: 'Portable Water Can',       price:  900,  image: 'images/products/water-can.png',     badge: 'Available',   category: 'tools',    rating: 4, reviews:  56, inStock: true },
-    { id: 5,  name: 'Air Pump',                 price: 1500,  image: 'images/products/air-pump.png',      badge: 'Available',   category: 'tools',    rating: 4, reviews:  92, inStock: true },
-    { id: 6,  name: 'Rain Coat',                price: 1500,  image: 'images/products/raincoat.png',      badge: 'Available',   category: 'clothing', rating: 5, reviews: 145, inStock: true },
-    { id: 7,  name: 'Rechargeable LED Light',   price: 1600,  image: 'images/products/led-light.png',     badge: 'Available',   category: 'lighting', rating: 5, reviews: 178, inStock: true },
-    { id: 8,  name: 'Folding Chair',            price: 4500,  image: 'images/products/folding-chair.png', badge: 'Best Seller', category: 'shelter',  rating: 5, reviews: 234, inStock: true },
-    { id: 9,  name: 'Hiking Stick',             price: 4900,  image: 'images/products/hiking-stick.png',  badge: 'Available',   category: 'tools',    rating: 4, reviews: 112, inStock: true },
-    { id: 10, name: 'Heavy Backpack',           price:10000,  image: 'images/products/backpack.png',      badge: 'Available',   category: 'tools',    rating: 5, reviews: 289, inStock: true },
-    { id: 11, name: 'Camping Cookware',         price:11500,  image: 'images/products/cookware.png',      badge: 'Available',   category: 'cooking',  rating: 5, reviews: 167, inStock: true },
-    { id: 12, name: 'Sleeping Bag',             price: 5900,  image: 'images/products/sleeping-bag.png',  badge: 'Best Seller', category: 'shelter',  rating: 5, reviews: 341, inStock: true }
-  ];
-
+  products: Product[] = [];
   filteredProducts: Product[] = [];
-  cartItems: CartItem[] = [];
+  originalProducts: Product[] = [];
+  cartItems: PurchaseCartItem[] = [];
 
-  constructor(private router: Router) {}
+  // ── Pagination ──────────────────────────────────────────────
+  readonly pageSize = 4;
+  visibleCount = this.pageSize;
+  // ────────────────────────────────────────────────────────────
 
-  ngOnInit() {
-    this.filteredProducts = [...this.products];
-    this.loadCartFromStorage();
+  private cartSubscription?: Subscription;
+
+  constructor(
+    private productService: ProductService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private purchaseCartService: PurchaseCartService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadProducts();
+
+    this.cartSubscription = this.purchaseCartService.cart$.subscribe((cart) => {
+      this.cartItems = cart;
+      this.cdr.detectChanges();
+    });
   }
 
-  // ------------------------------
-  // Filtering & Sorting
-  // ------------------------------
-  filterProducts() {
-    let filtered = [...this.products];
+  ngOnDestroy(): void {
+    this.cartSubscription?.unsubscribe();
+  }
 
-    // Search
-    if (this.searchTerm) {
-      const q = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
+  // ── Pagination helpers ───────────────────────────────────────
+  get visibleProducts(): Product[] {
+    return this.filteredProducts.slice(0, this.visibleCount);
+  }
+
+  get hasMore(): boolean {
+    return this.visibleCount < this.filteredProducts.length;
+  }
+
+  get hasLess(): boolean {
+    return this.visibleCount > this.pageSize;
+  }
+
+  showMore(): void {
+    this.visibleCount = Math.min(
+      this.visibleCount + this.pageSize,
+      this.filteredProducts.length
+    );
+    this.cdr.detectChanges();
+  }
+
+  showLess(): void {
+    this.visibleCount = this.pageSize;
+    this.cdr.detectChanges();
+  }
+  // ────────────────────────────────────────────────────────────
+
+  loadProducts(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    this.productService.getProducts().subscribe({
+      next: (products: Product[]) => {
+        const saleProducts = products.filter((product) => product.type === 'SALE');
+
+        this.originalProducts = [...saleProducts];
+        this.products = [...saleProducts];
+        this.filteredProducts = [...saleProducts];
+        this.visibleCount = this.pageSize; // reset on load
+        this.loading = false;
+
+        this.cdr.detectChanges();
+      },
+      error: (error: unknown) => {
+        console.error('Failed to load products', error);
+        this.errorMessage = 'Failed to load products. Please try again later.';
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  getStockLabel(product: Product): StockLabel {
+    if (product.stockStatus === 'OUT_OF_STOCK') return 'Out of Stock';
+    if (product.stockStatus === 'LOW_STOCK') return 'Running Out';
+    return 'In Stock';
+  }
+
+  isProductInStock(product: Product): boolean {
+    return product.stockStatus !== 'OUT_OF_STOCK' && product.availableUnits > 0;
+  }
+
+  getProductImage(product: Product | PurchaseCartItem): string {
+    return product.imageUrl?.trim() || 'images/products/placeholder.png';
+  }
+
+  filterProducts(): void {
+    let filtered = [...this.originalProducts];
+
+    if (this.searchTerm.trim()) {
+      const query = this.searchTerm.toLowerCase();
+
+      filtered = filtered.filter(
+        (product) =>
+          product.productName.toLowerCase().includes(query) ||
+          product.productId.toLowerCase().includes(query) ||
+          (product.description || '').toLowerCase().includes(query)
       );
     }
 
-    // Category
-    if (this.selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === this.selectedCategory);
+    this.filteredProducts = [...filtered];
+    this.visibleCount = this.pageSize; // reset pagination on filter
+
+    if (this.sortBy !== 'default') {
+      this.applySortOnly();
     }
 
-    this.filteredProducts = filtered;
-    this.sortProducts(); // always sort after filtering
+    this.cdr.detectChanges();
   }
 
-  /**
-   * Weighted rating sort (Bayesian average)
-   * Prevents a product with few reviews from outranking one with many.
-   */
-  private getGlobalMean(): number {
-    if (!this.products.length) return 0;
-    const sum = this.products.reduce((s, p) => s + p.rating, 0);
-    return sum / this.products.length;
+  sortProducts(): void {
+    if (this.sortBy === 'default') {
+      this.filterProducts();
+      return;
+    }
+
+    this.applySortOnly();
+    this.visibleCount = this.pageSize; // reset pagination on sort
+    this.cdr.detectChanges();
   }
 
-  private weightedRating(p: Product, C: number, m = 10): number {
-    // R = product rating, v = number of reviews, C = global mean, m = minimum reviews
-    const R = p.rating;
-    const v = Math.max(0, p.reviews || 0);
-    return (v / (v + m)) * R + (m / (v + m)) * C;
-  }
-
-  sortProducts() {
+  private applySortOnly(): void {
     switch (this.sortBy) {
       case 'price-low':
         this.filteredProducts.sort((a, b) => a.price - b.price);
@@ -108,110 +176,120 @@ export class ShopComponent implements OnInit {
         this.filteredProducts.sort((a, b) => b.price - a.price);
         break;
       case 'name':
-        this.filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+        this.filteredProducts.sort((a, b) => a.productName.localeCompare(b.productName));
         break;
-      case 'rating': {
-        const C = this.getGlobalMean();
-        this.filteredProducts.sort((a, b) => this.weightedRating(b, C) - this.weightedRating(a, C));
+      case 'stock':
+        this.filteredProducts.sort((a, b) => b.stockPercentage - a.stockPercentage);
         break;
-      }
-      default:
-        // keep original order
+      case 'default':
         break;
     }
   }
 
-  clearSearch() {
+  clearSearch(): void {
     this.searchTerm = '';
     this.filterProducts();
   }
 
-  clearCategory() {
-    this.selectedCategory = 'all';
-    this.filterProducts();
-  }
+  addToCart(product: Product): void {
+    if (!this.isProductInStock(product)) return;
 
-  // ------------------------------
-  // Cart
-  // ------------------------------
-  addToCart(product: Product) {
-    if (!product.inStock) return;
-
-    const existing = this.cartItems.find(item => item.id === product.id);
-    if (existing) {
-      existing.quantity++;
-    } else {
-      this.cartItems.push({ ...product, quantity: 1 });
+    if (!this.isLoggedIn()) {
+      this.pendingAction = 'cart';
+      this.showAuthRequiredModal = true;
+      return;
     }
 
-    this.saveCartToStorage();
+    if (product.type !== 'SALE') return;
+
+    this.purchaseCartService.addToCart({
+      productId: product.id,
+      productCode: product.productId,
+      productName: product.productName,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      quantity: 1,
+      availableUnits: product.availableUnits,
+    });
+
+    this.successMessage = `${product.productName} added to cart.`;
     this.isCartOpen = true;
+
+    setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 2500);
   }
 
-  removeFromCart(item: CartItem) {
-    this.cartItems = this.cartItems.filter(i => i.id !== item.id);
-    this.saveCartToStorage();
+  removeFromCart(item: PurchaseCartItem): void {
+    this.purchaseCartService.remove(item.productId);
   }
 
-  incrementQuantity(item: CartItem) {
-    item.quantity++;
-    this.saveCartToStorage();
+  incrementQuantity(item: PurchaseCartItem): void {
+    this.purchaseCartService.increase(item.productId);
   }
 
-  decrementQuantity(item: CartItem) {
-    if (item.quantity > 1) {
-      item.quantity--;
-      this.saveCartToStorage();
-    } else {
-      this.removeFromCart(item);
-    }
+  decrementQuantity(item: PurchaseCartItem): void {
+    this.purchaseCartService.decrease(item.productId);
   }
 
   getCartTotal(): number {
-    return this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    return this.purchaseCartService.getSubtotal();
   }
 
-  toggleCart() {
+  toggleCart(): void {
+    if (!this.isLoggedIn()) {
+      this.pendingAction = 'cart';
+      this.showAuthRequiredModal = true;
+      return;
+    }
+
     this.isCartOpen = !this.isCartOpen;
   }
 
-  quickView(product: Product) {
+  quickView(product: Product): void {
     this.selectedProduct = product;
   }
 
-  closeQuickView() {
+  closeQuickView(): void {
     this.selectedProduct = null;
   }
 
-  // ------------------------------
-  // Checkout (auth-gated)
-  // ------------------------------
-  checkout() {
-    const loggedIn = localStorage.getItem('accessToken'); // use token presence
-    if (!loggedIn) {
-      this.isCartOpen = false;
-      this.router.navigate(['/auth-intent'], { queryParams: { intent: 'checkout', returnUrl: '/checkout' } });
+  checkout(): void {
+    if (!this.isLoggedIn()) {
+      this.pendingAction = 'checkout';
+      this.showAuthRequiredModal = true;
       return;
     }
-    // Navigate to your checkout page (you can carry cart total via state or queryParams)
-    alert(`Proceeding to checkout with ${this.cartItems.length} items. Total: LKR ${this.getCartTotal()}`);
+
+    if (this.cartItems.length === 0) return;
+
+    this.isCartOpen = false;
+    this.router.navigate(['/checkout']);
   }
 
-  // ------------------------------
-  // Storage
-  // ------------------------------
-  private saveCartToStorage() {
-    localStorage.setItem('cart', JSON.stringify(this.cartItems));
+  goToLogin(): void {
+    this.router.navigate(['/login'], {
+      queryParams: {
+        returnUrl: this.pendingAction === 'checkout' ? '/checkout' : '/shop',
+      },
+    });
   }
 
-  private loadCartFromStorage() {
-    const saved = localStorage.getItem('cart');
-    if (saved) {
-      try {
-        this.cartItems = JSON.parse(saved);
-      } catch (e) {
-        console.error('Error loading cart from storage', e);
-      }
-    }
+  goToSignup(): void {
+    this.router.navigate(['/signup'], {
+      queryParams: {
+        returnUrl: this.pendingAction === 'checkout' ? '/checkout' : '/shop',
+      },
+    });
+  }
+
+  closeAuthModal(): void {
+    this.showAuthRequiredModal = false;
+    this.pendingAction = null;
+  }
+
+  private isLoggedIn(): boolean {
+    return !!localStorage.getItem('accessToken');
   }
 }

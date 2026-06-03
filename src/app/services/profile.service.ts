@@ -1,6 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+export interface Profile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  profileImageUrl?: string;
+}
+
+export interface ApiMessage {
+  message: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -9,18 +21,25 @@ export class ProfileService {
 
   constructor(private http: HttpClient) {}
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('accessToken'); // stored after login
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+  getProfile(): Observable<Profile> {
+    return this.http.get<Profile>(this.api);
   }
 
-  getProfile(): Observable<any> {
-    return this.http.get(this.api, { headers: this.getAuthHeaders() });
+  updateProfile(data: Profile): Observable<any> {
+    return this.http.put(this.api, data);
   }
 
-  updateProfile(data: any): Observable<any> {
-    return this.http.put(this.api, data, { headers: this.getAuthHeaders() });
+  deactivateAccount(): Observable<ApiMessage> {
+    return this.http.delete<ApiMessage>(this.api);
+  }
+
+  uploadProfileImage(file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(
+      `${this.api}/upload`,
+      formData
+    );
   }
 }

@@ -3,53 +3,40 @@ import {
   ElementRef,
   ViewChild,
   AfterViewChecked,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { finalize } from 'rxjs/operators';
 
-import { DomSanitizer } from '@angular/platform-browser';
-
 import { ChatbotService } from '../../services/chatbot.service';
-
-interface Message {
-  text: any;
-  role: 'user' | 'bot';
-  timestamp: Date;
-}
+import { ChatMessage, ChatbotResponse } from '../../models/chatbot.model';
 
 @Component({
   selector: 'app-chat-assistant',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './chat-assistant.component.html'
+  templateUrl: './chat-assistant.component.html',
 })
 export class ChatAssistantComponent implements AfterViewChecked {
-
   @ViewChild('messagesContainer')
-  messagesContainer!: ElementRef;
+  messagesContainer!: ElementRef<HTMLDivElement>;
 
   isChatOpen = false;
-
   userInput = '';
-
   isLoading = false;
 
-  messages: Message[] = [];
+  messages: ChatMessage[] = [];
 
   private shouldScroll = false;
 
   constructor(
     private chatbotService: ChatbotService,
-    private cdr: ChangeDetectorRef,
-    private sanitizer: DomSanitizer
+    private cdr: ChangeDetectorRef
   ) {}
 
-  toggleChat() {
-
+  toggleChat(): void {
     this.isChatOpen = !this.isChatOpen;
 
     setTimeout(() => {
@@ -57,42 +44,34 @@ export class ChatAssistantComponent implements AfterViewChecked {
     }, 100);
   }
 
-  sendMessage(event: Event) {
-
+  sendMessage(event: Event): void {
     event.preventDefault();
 
     const question = this.userInput.trim();
 
     if (!question || this.isLoading) return;
 
-    // USER MESSAGE
     this.messages.push({
       text: question,
       role: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.userInput = '';
-
     this.isLoading = true;
-
     this.shouldScroll = true;
 
-    // FORCE UI UPDATE
     this.cdr.detectChanges();
 
     setTimeout(() => {
       this.scrollToBottom();
     }, 100);
 
-    // API CALL
-    this.chatbotService.sendMessage(question)
+    this.chatbotService
+      .sendMessage(question)
       .pipe(
         finalize(() => {
-
           this.isLoading = false;
-
-          // FORCE UI UPDATE
           this.cdr.detectChanges();
 
           setTimeout(() => {
@@ -101,25 +80,18 @@ export class ChatAssistantComponent implements AfterViewChecked {
         })
       )
       .subscribe({
-
-        next: (response: any) => {
-
-          console.log('BOT RESPONSE:', response);
-
-          const formattedResponse =
-            this.formatBotResponse(
-              response?.resultData || 'No response received'
-            );
+        next: (response: ChatbotResponse) => {
+          const formattedResponse = this.formatBotResponse(
+            response.resultData || 'No response received'
+          );
 
           this.messages.push({
-          text: formattedResponse,
+            text: formattedResponse,
             role: 'bot',
-            timestamp: new Date()
+            timestamp: new Date(),
           });
 
           this.shouldScroll = true;
-
-          // FORCE UI REFRESH
           this.cdr.detectChanges();
 
           setTimeout(() => {
@@ -127,88 +99,65 @@ export class ChatAssistantComponent implements AfterViewChecked {
           }, 100);
         },
 
-        error: (error) => {
-
+        error: (error: unknown) => {
           console.error('CHATBOT ERROR:', error);
 
           this.messages.push({
             text: 'Sorry, assistant unavailable right now.',
             role: 'bot',
-            timestamp: new Date()
+            timestamp: new Date(),
           });
 
           this.shouldScroll = true;
-
-          // FORCE UI REFRESH
           this.cdr.detectChanges();
 
           setTimeout(() => {
             this.scrollToBottom();
           }, 100);
-        }
+        },
       });
   }
 
-  ngAfterViewChecked() {
-
+  ngAfterViewChecked(): void {
     if (this.shouldScroll) {
-
       this.scrollToBottom();
-
       this.shouldScroll = false;
     }
   }
 
-  private scrollToBottom() {
-
+  private scrollToBottom(): void {
     try {
+      const container = this.messagesContainer?.nativeElement;
 
-      if (this.messagesContainer) {
-
-        this.messagesContainer.nativeElement.scrollTop =
-          this.messagesContainer.nativeElement.scrollHeight;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
       }
-
-    } catch (err) {
-
+    } catch (err: unknown) {
       console.error(err);
     }
   }
 
-  // FORMAT BOT RESPONSE
   private formatBotResponse(text: string): string {
-
-    // BOLD TEXT
     text = text.replace(
       /\*\*(.*?)\*\*/g,
       '<strong class="font-semibold">$1</strong>'
     );
 
-    // FIX INLINE BULLETS
     text = text.replace(/\s\*\s/g, '\n* ');
 
     const lines = text.split('\n');
 
     let formatted = '';
-
     let insideList = false;
 
-    lines.forEach(line => {
-
+    lines.forEach((line: string) => {
       const trimmed = line.trim();
 
-      // BULLET POINTS
-      if (
-        trimmed.startsWith('* ') ||
-        trimmed.startsWith('- ')
-      ) {
-
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
         if (!insideList) {
-
           formatted += `
             <ul class="list-disc pl-5 my-3 space-y-2">
           `;
-
           insideList = true;
         }
 
@@ -217,20 +166,13 @@ export class ChatAssistantComponent implements AfterViewChecked {
             ${trimmed.substring(2)}
           </li>
         `;
-
       } else {
-
-        // CLOSE LIST
         if (insideList) {
-
           formatted += '</ul>';
-
           insideList = false;
         }
 
-        // NORMAL PARAGRAPH
         if (trimmed !== '') {
-
           formatted += `
             <p class="mb-3 leading-7">
               ${trimmed}
@@ -240,9 +182,7 @@ export class ChatAssistantComponent implements AfterViewChecked {
       }
     });
 
-    // CLOSE LAST LIST
     if (insideList) {
-
       formatted += '</ul>';
     }
 

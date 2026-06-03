@@ -2,15 +2,18 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl, SafeHtml } from '@angular/platform-browser';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CampingTipService } from '../../services/camping-tip.service';
+import { CampingTip } from '../../models/camping-tip.model';
 
 @Component({
   selector: 'app-guide-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './guide-detail.component.html',
 })
 export class GuideDetailComponent implements OnInit {
-  guide: any = null;
+  guide: CampingTip | null = null;
   loading = true;
   error = '';
 
@@ -18,7 +21,8 @@ export class GuideDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef,
+    private campingTipService: CampingTipService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -31,27 +35,30 @@ export class GuideDetailComponent implements OnInit {
 
     const isNumeric = /^\d+$/.test(slugOrId);
 
-    const url = isNumeric
-      ? `http://localhost:8080/api/camping-tips/id/${slugOrId}`
-      : `http://localhost:8080/api/camping-tips/${slugOrId}`;
+    const request = isNumeric
+      ? this.campingTipService.getPublicTipById(Number(slugOrId))
+      : this.campingTipService.getPublicTipBySlug(slugOrId);
 
-    fetch(url)
-      .then(async (res) => {
+    request.subscribe({
+      next: (res: CampingTip) => {
+        this.guide = res;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: unknown) => {
+        console.error('Failed to load guide', err);
+
         this.loading = false;
 
-        if (res.ok) {
-          this.guide = await res.json();
-        } else {
+        if (err instanceof HttpErrorResponse && err.status === 404) {
           this.error = 'Article not found.';
+        } else {
+          this.error = 'Cannot reach the server.';
         }
 
         this.cdr.detectChanges();
-      })
-      .catch(() => {
-        this.loading = false;
-        this.error = 'Cannot reach the server.';
-        this.cdr.detectChanges();
-      });
+      },
+    });
   }
 
   safeContent(html: string): SafeHtml {
@@ -60,7 +67,9 @@ export class GuideDetailComponent implements OnInit {
 
   sanitizeYoutube(url: string): SafeResourceUrl {
     const id = this.extractYoutubeId(url);
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${id}`);
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${id}`
+    );
   }
 
   sanitizeVideo(url: string): SafeResourceUrl {
@@ -77,7 +86,7 @@ export class GuideDetailComponent implements OnInit {
     return match ? match[1] : '';
   }
 
-  formatDate(dateStr: string): string {
+  formatDate(dateStr?: string): string {
     if (!dateStr) return '';
 
     return new Date(dateStr).toLocaleDateString('en-US', {

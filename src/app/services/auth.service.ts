@@ -1,34 +1,39 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { APP_CONFIG } from '../config/app-config.token';
-import { tap, finalize } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
+import { APP_CONFIG } from '../config/app-config.token';
+import {
+  ApiMessage,
+  AuthResponse,
+  ForgotPasswordRequest,
+  JwtPayload,
+  LoginRequest,
+  RefreshRequest,
+  RegisterRequest,
+  ResendVerificationRequest,
+  ResetPasswordRequest,
+} from '../models/auth.model';
+import { TermsCondition } from '../models/terms.model';
 
-export type AuthResponse = {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: 'Bearer';
-  email: string;
-  fullName: string;
-    roles: string[]; 
-};
-
-/** ---- Inline JWT helpers (expiry-aware isLoggedIn) ---- */
-function getJwtPayload(token: string): any | null {
+function getJwtPayload(token: string): JwtPayload | null {
   try {
     const payloadBase64 = token.split('.')[1];
+    if (!payloadBase64) return null;
+
     const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
-    const json = atob(base64);
-    return JSON.parse(json);
+    return JSON.parse(atob(base64)) as JwtPayload;
   } catch {
     return null;
   }
 }
+
 function isJwtValid(token: string, skewSeconds = 10): boolean {
-  const p = getJwtPayload(token);
-  if (!p || typeof p.exp !== 'number') return false;
+  const payload = getJwtPayload(token);
+  if (!payload || typeof payload.exp !== 'number') return false;
+
   const now = Math.floor(Date.now() / 1000);
-  return p.exp > (now + skewSeconds);
+  return payload.exp > now + skewSeconds;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,72 +41,109 @@ export class AuthService {
   private http = inject(HttpClient);
   private cfg = inject(APP_CONFIG);
 
-  /** True only if access token exists AND not expired */
   isLoggedIn(): boolean {
     const token = localStorage.getItem('accessToken');
     return !!token && isJwtValid(token);
   }
 
-login(email: string, password: string, rememberMe = false) {
-  return this.http
-    .post<AuthResponse>(`${this.cfg.apiBaseUrl}/api/auth/login`, { email, password, rememberMe })
-    .pipe(tap(res => this.saveSession(res)));
-}
+  login(email: string, password: string, rememberMe = false): Observable<AuthResponse> {
+    const body: LoginRequest = { email, password, rememberMe };
 
-private saveSession(res: AuthResponse) {
-  localStorage.setItem('accessToken',  res.accessToken);
-  localStorage.setItem('refreshToken', res.refreshToken);
-  localStorage.setItem('roles', JSON.stringify(res.roles ?? []));  // ← add this line
-  localStorage.setItem('user', JSON.stringify({ email: res.email, name: res.fullName }));
-}
-
-
-  signup(body: { firstName: string; lastName: string; email: string; phone: string; password: string }) {
-    return this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/register`, body);
+    return this.http
+      .post<AuthResponse>(`${this.cfg.apiBaseUrl}/api/auth/login`, body)
+      .pipe(tap((res) => this.saveSession(res)));
   }
 
-  forgotPassword(email: string) {
-    return this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/forgot-password`, { email });
+  signup(body: RegisterRequest): Observable<ApiMessage> {
+    return this.http.post<ApiMessage>(`${this.cfg.apiBaseUrl}/api/auth/register`, body);
   }
 
-  resetPassword(token: string, newPassword: string) {
-    return this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/reset-password`, { token, newPassword });
+  forgotPassword(email: string): Observable<ApiMessage> {
+    const body: ForgotPasswordRequest = { email };
+
+    return this.http.post<ApiMessage>(
+      `${this.cfg.apiBaseUrl}/api/auth/forgot-password`,
+      body
+    );
   }
 
-  verify(token: string) {
+  resetPassword(token: string, newPassword: string): Observable<ApiMessage> {
+    const body: ResetPasswordRequest = { token, newPassword };
+
+    return this.http.post<ApiMessage>(
+      `${this.cfg.apiBaseUrl}/api/auth/reset-password`,
+      body
+    );
+  }
+
+  resendVerification(email: string): Observable<ApiMessage> {
+    const body: ResendVerificationRequest = { email };
+
+    return this.http.post<ApiMessage>(
+      `${this.cfg.apiBaseUrl}/api/auth/resend-verification`,
+      body
+    );
+  }
+
+  verify(token: string): Observable<ApiMessage> {
     const params = new HttpParams().set('token', token);
-    return this.http.get<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/verify`, { params });
+
+    return this.http.get<ApiMessage>(`${this.cfg.apiBaseUrl}/api/auth/verify`, {
+      params,
+    });
   }
 
-  /** Revoke this session’s refresh token on the backend */
-  backendLogout(): Observable<{ message: string }> {
+  refresh(refreshToken: string): Observable<AuthResponse> {
+    const body: RefreshRequest = { refreshToken };
+
+    return this.http
+      .post<AuthResponse>(`${this.cfg.apiBaseUrl}/api/auth/refresh`, body)
+      .pipe(tap((res) => this.saveSession(res)));
+  }
+
+  getActiveTerms(): Observable<TermsCondition> {
+    return this.http.get<TermsCondition>(`${this.cfg.apiBaseUrl}/api/terms/active`);
+  }
+
+  backendLogout(): Observable<ApiMessage> {
     const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) return of({ message: 'No refresh token' });
-    return this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/logout`, { refreshToken });
+
+    if (!refreshToken) {
+      return of({ message: 'No refresh token' });
+    }
+
+    const body: RefreshRequest = { refreshToken };
+
+    return this.http.post<ApiMessage>(`${this.cfg.apiBaseUrl}/api/auth/logout`, body);
   }
 
-  /** Clear local storage and (optionally) redirect to /login */
-  clearLocalAndRedirect(redirectToLogin = true) {
+  logout(redirectToLogin = true): void {
+    this.backendLogout()
+      .pipe(finalize(() => this.clearLocalAndRedirect(redirectToLogin)))
+      .subscribe({ error: () => {} });
+  }
+
+  clearLocalAndRedirect(redirectToLogin = true): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-      localStorage.removeItem('roles');
+    localStorage.removeItem('roles');
     localStorage.removeItem('user');
+
     if (redirectToLogin) {
       window.location.href = '/login';
     }
   }
 
-  /** Logout this device: revoke refresh on server, then clear local */
-  logout(redirectToLogin = true) {
-    this.backendLogout()
-      .pipe(finalize(() => this.clearLocalAndRedirect(redirectToLogin)))
-      .subscribe({ error: () => {/* ignore: still clear locally */} });
-  }
-
-  /** (Optional) Logout all devices for this user (if you added /logout-all) */
-  logoutAll(redirectToLogin = true) {
-    this.http.post<{ message: string }>(`${this.cfg.apiBaseUrl}/api/auth/logout-all`, {})
-      .pipe(finalize(() => this.clearLocalAndRedirect(redirectToLogin)))
-      .subscribe({ error: () => this.clearLocalAndRedirect(redirectToLogin) });
+  private saveSession(res: AuthResponse): void {
+    localStorage.setItem('accessToken', res.accessToken);
+    localStorage.setItem('refreshToken', res.refreshToken);
+    localStorage.setItem('roles', JSON.stringify(res.roles ?? []));
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        email: res.email,
+        name: res.fullName,
+      })
+    );
   }
 }

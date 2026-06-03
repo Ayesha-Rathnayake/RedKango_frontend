@@ -1,260 +1,261 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Review {
-  id: number;
-  name: string;
-  avatar: string;
-  rating: number;
-  review: string;
-  date: string;
-  // What was rated (kept for compatibility)
-  service?: string;         // when targetType === 'service'
-  productName?: string;     // when targetType === 'product'
-  targetType?: 'product' | 'service';
-}
+import { ReviewsService } from '../../services/review.service';
+import { Review } from '../../models/review.model';
 
 interface NewReview {
-  name: string;
   rating: number;
   review: string;
-  targetType: '' | 'product' | 'service'; //  NEW
-  productName: string;                     // NEW (required if targetType='product')
-  service: string;                         //     (required if targetType='service')
+  targetType: '' | 'product' | 'service';
+  productName: string;
+  service: string;
 }
 
 @Component({
   selector: 'app-reviews',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './reviews.component.html'
+  templateUrl: './reviews.component.html',
 })
 export class ReviewsComponent implements OnInit {
-  overallRating = 5.0;
-  totalReviews = 124;
+  message = '';
+  messageType: 'success' | 'error' | '' = '';
 
-  ratingPercentages: { [key: number]: number } = {
-    5: 85,
-    4: 10,
-    3: 3,
-    2: 1,
-    1: 1
-  };
+  modalMessage = '';
+  modalMessageType: 'success' | 'error' | '' = '';
 
-  //  Initialize with extended fields
+  loading = false;
+  submitting = false;
+
+  showReviewModal = false;
+  filterType: 'all' | 'product' | 'service' = 'all';
+
+  readonly initialVisibleCount = 3;
+  visibleCount = this.initialVisibleCount;
+
+  reviews: Review[] = [];
+
   newReview: NewReview = {
-    name: '',
     rating: 0,
     review: '',
     targetType: '',
     productName: '',
-    service: ''
+    service: '',
   };
 
-  reviews: Review[] = [
-    {
-      id: 1,
-      name: 'James Collins',
-      avatar: 'images/avatars/user1.jpg',
-      rating: 5,
-      review:
-        "This camping gear exceeded my expectations! The quality is incredible and it made our camping trip so much easier. The setup was quick, comfortable, and very easy to use. I've never had any problems with it. I highly recommend this!",
-      date: '2024-01-15',
-      service: 'Equipment Purchase',
-      targetType: 'service'
-    },
-    {
-      id: 2,
-      name: 'Sarah Thompson',
-      avatar: 'images/avatars/user2.jpg',
-      rating: 5,
-      review:
-        'This camping tent is just a game changer!! I have been camped in it for a whole week. It kept me dry and warm, the attention to detail and quality was perfect. The tent held up perfectly despite heavy rains. Highly recommend!',
-      date: '2024-01-12',
-      service: 'Tent Rental',
-      targetType: 'service'
-    },
-    {
-      id: 3,
-      name: 'Carol Rodriguez',
-      avatar: 'images/avatars/user3.jpg',
-      rating: 4,
-      review:
-        'Overall an awesome camping experience. The quality is excellent and it is very functional. Red Kango went above and beyond to make sure we had everything we needed. Great customer service!',
-      date: '2024-01-10',
-      service: 'Camping Trip',
-      targetType: 'service'
-    },
-    {
-      id: 4,
-      name: 'Michael Carter',
-      avatar: 'images/avatars/user4.jpg',
-      rating: 5,
-      review:
-        'What a find! Awesome gear! I really like my outdoor tent. I have been using it for weeks, and it has exceeded my expectations. Very durable, spacious and easy to set up. The design is intelligent, and I love every minute camping on this! I would recommend this to everyone.',
-      date: '2024-01-08',
-      service: 'Tent Rental',
-      targetType: 'service'
-    },
-    {
-      id: 5,
-      name: 'Emily Watson',
-      avatar: 'images/avatars/user5.jpg',
-      rating: 5,
-      review:
-        'Excellent service and quality products! The staff was knowledgeable and helped me choose the perfect gear for my needs. Everything worked flawlessly during our camping trip.',
-      date: '2024-01-05',
-      service: 'Equipment Purchase',
-      targetType: 'service'
-    },
-    {
-      id: 6,
-      name: 'David Martinez',
-      avatar: 'images/avatars/user6.jpg',
-      rating: 4,
-      review:
-        'Great experience overall. The equipment was in excellent condition and the rental process was smooth. Only minor suggestion would be to include more detailed setup instructions.',
-      date: '2024-01-03',
-      service: 'Tent Rental',
-      targetType: 'service'
-    }
-  ];
+  constructor(
+    private reviewsService: ReviewsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  displayedReviews: Review[] = [];
-  reviewsPerPage = 4;
-  currentPage = 1;
-
-  ngOnInit() {
-    this.loadReviews();
-    this.calculateRatings();
+  ngOnInit(): void {
+    this.fetchReviews();
   }
 
-  loadReviews() {
-    const endIndex = this.currentPage * this.reviewsPerPage;
-    this.displayedReviews = this.reviews.slice(0, endIndex);
+  get filteredReviewList(): Review[] {
+    if (this.filterType === 'all') return this.reviews;
+    return this.reviews.filter((review) => review.targetType === this.filterType);
   }
 
-  loadMore() {
-    this.currentPage++;
-    this.loadReviews();
+  get displayedReviews(): Review[] {
+    return this.filteredReviewList.slice(0, this.visibleCount);
   }
 
-  /**
-   * ⭐ Star toggle:
-   * - Clicking first star (1★) again turns rating back to 0
-   */
-  toggleStar(star: number) {
-    if (star === 1 && this.newReview.rating === 1) {
-      this.newReview.rating = 0;
-    } else {
-      this.newReview.rating = star;
-    }
+  get hasMoreReviews(): boolean {
+    return this.visibleCount < this.filteredReviewList.length;
   }
 
-  /**
-   * (Optional) Old helper remained for backward compatibility.
-   * If your template no longer calls setRating(), you can remove it.
-   */
-  setRating(rating: number) {
-    this.newReview.rating = rating;
+  get canShowLess(): boolean {
+    return (
+      this.filteredReviewList.length > this.initialVisibleCount &&
+      this.visibleCount >= this.filteredReviewList.length
+    );
   }
 
-  submitReview(event: Event) {
+  get remainingReviewCount(): number {
+    return Math.max(this.filteredReviewList.length - this.visibleCount, 0);
+  }
+
+  fetchReviews(): void {
+    this.loading = true;
+
+    this.reviewsService.getReviews().subscribe({
+      next: (res) => {
+        this.reviews = res || [];
+        this.filterType = 'all';
+        this.visibleCount = this.initialVisibleCount;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load reviews', err);
+        this.loading = false;
+        this.showMessage('Failed to load reviews. Please try again.', 'error');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  loadMore(): void {
+    this.visibleCount = Math.min(
+      this.visibleCount + this.initialVisibleCount,
+      this.filteredReviewList.length
+    );
+  }
+
+  showLess(): void {
+    this.visibleCount = this.initialVisibleCount;
+  }
+
+  changeFilter(type: 'all' | 'product' | 'service'): void {
+    this.filterType = type;
+    this.visibleCount = this.initialVisibleCount;
+  }
+
+  openReviewModal(): void {
+    this.showReviewModal = true;
+    this.message = '';
+    this.messageType = '';
+    this.modalMessage = '';
+    this.modalMessageType = '';
+  }
+
+  closeReviewModal(): void {
+    this.showReviewModal = false;
+    this.resetForm();
+    this.modalMessage = '';
+    this.modalMessageType = '';
+  }
+
+  toggleStar(star: number): void {
+    this.newReview.rating = this.newReview.rating === star ? 0 : star;
+  }
+
+  submitReview(event: Event): void {
     event.preventDefault();
 
-    //  Validate common fields
-    if (
-      !this.newReview.name ||
-      !this.newReview.rating ||
-      !this.newReview.review ||
-      !this.newReview.targetType
-    ) {
-      alert('Please complete all fields and provide a rating');
+    this.modalMessage = '';
+    this.modalMessageType = '';
+
+    if (!this.newReview.targetType) {
+      this.showModalMessage('Please select what you are rating.', 'error');
       return;
     }
 
-    //  Validate specific target selection
-    if (this.newReview.targetType === 'product' && !this.newReview.productName) {
-      alert('Please specify the product name');
+    if (this.newReview.targetType === 'product' && !this.newReview.productName.trim()) {
+      this.showModalMessage('Please enter the product name.', 'error');
       return;
     }
+
     if (this.newReview.targetType === 'service' && !this.newReview.service) {
-      alert('Please choose the service');
+      this.showModalMessage('Please select the service.', 'error');
       return;
     }
 
-    // Build review object depending on targetType
-    const review: Review = {
-      id: this.reviews.length + 1,
-      name: this.newReview.name,
-      avatar: 'images/avatars/default.jpg',
-      rating: this.newReview.rating,
-      review: this.newReview.review,
-      date: new Date().toISOString().split('T')[0],
-      targetType: this.newReview.targetType
-    };
-
-    if (this.newReview.targetType === 'product') {
-      review.productName = this.newReview.productName;
-    } else {
-      review.service = this.newReview.service;
+    if (!this.newReview.rating) {
+      this.showModalMessage('Please select a star rating.', 'error');
+      return;
     }
 
-    // Insert at the top
-    this.reviews.unshift(review);
+    if (!this.newReview.review.trim()) {
+      this.showModalMessage('Please write your review.', 'error');
+      return;
+    }
 
-    // Update stats and reset paging
-    this.calculateRatings();
-    this.currentPage = 1;
-    this.loadReviews();
+    this.submitting = true;
 
-    // Reset the form
+    this.reviewsService
+      .createReview({
+        targetType: this.newReview.targetType,
+        productName:
+          this.newReview.targetType === 'product'
+            ? this.newReview.productName.trim()
+            : undefined,
+        service:
+          this.newReview.targetType === 'service'
+            ? this.newReview.service
+            : undefined,
+        rating: this.newReview.rating,
+        review: this.newReview.review.trim(),
+      })
+      .subscribe({
+        next: (savedReview) => {
+          this.reviews.unshift(savedReview);
+
+          this.resetForm();
+          this.filterType = 'all';
+          this.visibleCount = this.initialVisibleCount;
+          this.submitting = false;
+
+          this.showModalMessage(
+            'Review submitted successfully. Thank you for sharing your experience!',
+            'success'
+          );
+
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.showReviewModal = false;
+            this.modalMessage = '';
+            this.modalMessageType = '';
+            this.cdr.detectChanges();
+          }, 2000);
+        },
+        error: (err) => {
+          console.error('Failed to submit review', err);
+          this.submitting = false;
+
+          if (err.status === 401 || err.status === 403) {
+            this.showModalMessage('Please login before submitting a review.', 'error');
+          } else {
+            this.showModalMessage('Failed to submit review. Please try again.', 'error');
+          }
+
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  resetForm(): void {
     this.newReview = {
-      name: '',
       rating: 0,
       review: '',
       targetType: '',
       productName: '',
-      service: ''
+      service: '',
     };
-
-    alert('Thank you for your review! 🎉');
-
-    // Smooth scroll to the list
-    setTimeout(() => {
-      const reviewsSection = document.querySelector(
-        '.bg-white.rounded-lg.shadow-lg:last-child'
-      );
-      reviewsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
   }
 
-  private calculateRatings() {
-    this.totalReviews = this.reviews.length;
+  showMessage(text: string, type: 'success' | 'error'): void {
+    this.message = text;
+    this.messageType = type;
 
-    if (this.totalReviews === 0) {
-      this.overallRating = 0;
-      this.ratingPercentages = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-      return;
-    }
+    setTimeout(() => {
+      this.message = '';
+      this.messageType = '';
+    }, 4000);
+  }
 
-    // Overall average
-    const totalRating = this.reviews.reduce((sum, r) => sum + r.rating, 0);
-    this.overallRating = Math.round((totalRating / this.totalReviews) * 10) / 10;
+  showModalMessage(text: string, type: 'success' | 'error'): void {
+    this.modalMessage = text;
+    this.modalMessageType = type;
+  }
 
-    // Percentages per star
-    const ratingCounts: { [key: number]: number } = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    this.reviews.forEach((r) => {
-      ratingCounts[r.rating] = (ratingCounts[r.rating] || 0) + 1;
+  getInitial(name: string): string {
+    return name?.charAt(0)?.toUpperCase() || 'U';
+  }
+
+  getTargetLabel(review: Review): string {
+    if (review.targetType === 'product') return review.productName || 'Product';
+    return review.service || 'Service';
+  }
+
+  formatDate(date: string): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
-
-    this.ratingPercentages = {
-      5: Math.round((ratingCounts[5] / this.totalReviews) * 100),
-      4: Math.round((ratingCounts[4] / this.totalReviews) * 100),
-      3: Math.round((ratingCounts[3] / this.totalReviews) * 100),
-      2: Math.round((ratingCounts[2] / this.totalReviews) * 100),
-      1: Math.round((ratingCounts[1] / this.totalReviews) * 100)
-    };
   }
 }

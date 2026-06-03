@@ -1,6 +1,5 @@
 <div class="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-6">
   <div class="bg-white rounded-lg shadow-lg flex w-full max-w-3xl overflow-hidden">
-
     <!-- IMAGE SECTION -->
     <div class="hidden md:flex w-1/2 items-center justify-center bg-gray-50 p-4">
       <img src="/images/signup-illustration.png" class="max-w-sm" alt="Signup Illustration" />
@@ -12,28 +11,44 @@
       <p class="text-xs mb-3 text-gray-600">Create a new account</p>
 
       <!-- SUCCESS BANNER -->
-      <div *ngIf="successMessage"
-           class="flex items-start gap-2 bg-green-50 border border-green-200 text-green-800 rounded px-3 py-3 mb-4 text-[11px]"
-           role="status">
-        <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-width="2" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline stroke-width="2" points="22 4 12 14.01 9 11.01"/>
+      <div
+        *ngIf="successMessage"
+        class="flex items-start gap-2 bg-green-50 border border-green-200 text-green-800 rounded px-3 py-3 mb-4 text-[11px]"
+        role="status"
+      >
+        <svg
+          class="w-4 h-4 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-width="2" d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline stroke-width="2" points="22 4 12 14.01 9 11.01" />
         </svg>
         <div>
           <p class="font-semibold mb-0.5">Registration Successful!</p>
           <p>{{ successMessage }}</p>
-          <a routerLink="/login" class="text-[#0F5D2F] font-medium underline mt-1 inline-block">Go to Login →</a>
+          <a routerLink="/login" class="text-[#0F5D2F] font-medium underline mt-1 inline-block"
+            >Go to Login →</a
+          >
         </div>
       </div>
 
       <!-- GENERAL ERROR BANNER -->
-      <div *ngIf="errorMessage && !successMessage"
-           class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded px-3 py-2 mb-3 text-[11px]"
-           role="alert">
-        <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke-width="2"/>
-          <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
-          <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/>
+      <div
+        *ngIf="errorMessage && !successMessage"
+        class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded px-3 py-2 mb-3 text-[11px]"
+        role="alert"
+      >
+        <svg
+          class="w-3.5 h-3.5 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="12" cy="12" r="10" stroke-width="2" />
+          <line x1="12" y1="8" x2="12" y2="12" stroke-width="2" />
+          <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2" />
         </svg>
         <span>{{ errorMessage }}</span>
       </div>
@@ -43,12 +58,15 @@
         Old code had (ngSubmit)="signup()" with no argument, so the TypeScript
         method received undefined and crashed silently, leaving loading=true forever.
       -->
-      <form *ngIf="!successMessage"
-            (ngSubmit)="signup(signupForm)" #signupForm="ngForm" class="text-xs" novalidate>
-
+      <form
+        *ngIf="!successMessage"
+        (ngSubmit)="signup(signupForm)"
+        #signupForm="ngForm"
+        class="text-xs"
+        novalidate
+      >
         <!-- NAME ROW -->
         <div class="grid grid-cols-2 gap-3">
-
           <!-- First Name -->
           <div>
             <label class="block mb-1">First Name</label>
@@ -61,15 +79,26 @@
               maxlength="50"
               #firstNameCtrl="ngModel"
               placeholder="Jane"
-              [class]="'w-full border rounded px-3 py-2 outline-none transition-colors ' +
+              [class]="
+                'w-full border rounded px-3 py-2 outline-none transition-colors ' +
                 (firstNameCtrl.invalid && firstNameCtrl.touched
-                  ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+                  ? 'border-red-400 bg-red-50'
+                  : 'border-gray-300 focus:border-[#0F5D2F]')
+              "
             />
             <div class="min-h-[15px] mt-0.5 mb-1">
-              <p *ngIf="firstNameCtrl.touched && firstNameCtrl.hasError('required')"
-                 class="text-red-600 text-[10px]">First name is required</p>
-              <p *ngIf="firstNameCtrl.touched && firstNameCtrl.hasError('minlength')"
-                 class="text-red-600 text-[10px]">Min. 2 characters</p>
+              <p
+                *ngIf="firstNameCtrl.touched && firstNameCtrl.hasError('required')"
+                class="text-red-600 text-[10px]"
+              >
+                First name is required
+              </p>
+              <p
+                *ngIf="firstNameCtrl.touched && firstNameCtrl.hasError('minlength')"
+                class="text-red-600 text-[10px]"
+              >
+                Min. 2 characters
+              </p>
             </div>
           </div>
 
@@ -85,18 +114,28 @@
               maxlength="50"
               #lastNameCtrl="ngModel"
               placeholder="Doe"
-              [class]="'w-full border rounded px-3 py-2 outline-none transition-colors ' +
+              [class]="
+                'w-full border rounded px-3 py-2 outline-none transition-colors ' +
                 (lastNameCtrl.invalid && lastNameCtrl.touched
-                  ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+                  ? 'border-red-400 bg-red-50'
+                  : 'border-gray-300 focus:border-[#0F5D2F]')
+              "
             />
             <div class="min-h-[15px] mt-0.5 mb-1">
-              <p *ngIf="lastNameCtrl.touched && lastNameCtrl.hasError('required')"
-                 class="text-red-600 text-[10px]">Last name is required</p>
-              <p *ngIf="lastNameCtrl.touched && lastNameCtrl.hasError('minlength')"
-                 class="text-red-600 text-[10px]">Min. 2 characters</p>
+              <p
+                *ngIf="lastNameCtrl.touched && lastNameCtrl.hasError('required')"
+                class="text-red-600 text-[10px]"
+              >
+                Last name is required
+              </p>
+              <p
+                *ngIf="lastNameCtrl.touched && lastNameCtrl.hasError('minlength')"
+                class="text-red-600 text-[10px]"
+              >
+                Min. 2 characters
+              </p>
             </div>
           </div>
-
         </div>
 
         <!-- EMAIL -->
@@ -110,20 +149,38 @@
           #emailCtrl="ngModel"
           placeholder="you@example.com"
           (input)="onEmailInput()"
-          [class]="'w-full border rounded px-3 py-2 outline-none transition-colors ' +
-            ((emailCtrl.invalid && emailCtrl.touched) || emailTakenError || serverFieldErrors['email']
-              ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+          [class]="
+            'w-full border rounded px-3 py-2 outline-none transition-colors ' +
+            ((emailCtrl.invalid && emailCtrl.touched) ||
+            emailTakenError ||
+            serverFieldErrors['email']
+              ? 'border-red-400 bg-red-50'
+              : 'border-gray-300 focus:border-[#0F5D2F]')
+          "
         />
         <div class="min-h-[15px] mt-0.5 mb-1">
-          <p *ngIf="emailCtrl.touched && emailCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Email is required</p>
-          <p *ngIf="emailCtrl.touched && emailCtrl.hasError('email') && !emailCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Please enter a valid email address</p>
+          <p
+            *ngIf="emailCtrl.touched && emailCtrl.hasError('required')"
+            class="text-red-600 text-[10px]"
+          >
+            Email is required
+          </p>
+          <p
+            *ngIf="
+              emailCtrl.touched && emailCtrl.hasError('email') && !emailCtrl.hasError('required')
+            "
+            class="text-red-600 text-[10px]"
+          >
+            Please enter a valid email address
+          </p>
           <!-- 409 from server — email already taken -->
-          <p *ngIf="emailTakenError"
-             class="text-red-600 text-[10px]">{{ emailTakenError }}</p>
-          <p *ngIf="serverFieldErrors['email'] && !emailTakenError"
-             class="text-red-600 text-[10px]">{{ serverFieldErrors['email'] }}</p>
+          <p *ngIf="emailTakenError" class="text-red-600 text-[10px]">{{ emailTakenError }}</p>
+          <p
+            *ngIf="serverFieldErrors['email'] && !emailTakenError"
+            class="text-red-600 text-[10px]"
+          >
+            {{ serverFieldErrors['email'] }}
+          </p>
         </div>
 
         <!-- PHONE -->
@@ -136,15 +193,26 @@
           pattern="^[0-9+\-()\s]{7,20}$"
           #phoneCtrl="ngModel"
           placeholder="+94 xxx xxx xxx"
-          [class]="'w-full border rounded px-3 py-2 outline-none transition-colors ' +
+          [class]="
+            'w-full border rounded px-3 py-2 outline-none transition-colors ' +
             (phoneCtrl.invalid && phoneCtrl.touched
-              ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+              ? 'border-red-400 bg-red-50'
+              : 'border-gray-300 focus:border-[#0F5D2F]')
+          "
         />
         <div class="min-h-[15px] mt-0.5 mb-1">
-          <p *ngIf="phoneCtrl.touched && phoneCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Phone number is required</p>
-          <p *ngIf="phoneCtrl.touched && phoneCtrl.hasError('pattern')"
-             class="text-red-600 text-[10px]">Please enter a valid phone number</p>
+          <p
+            *ngIf="phoneCtrl.touched && phoneCtrl.hasError('required')"
+            class="text-red-600 text-[10px]"
+          >
+            Phone number is required
+          </p>
+          <p
+            *ngIf="phoneCtrl.touched && phoneCtrl.hasError('pattern')"
+            class="text-red-600 text-[10px]"
+          >
+            Please enter a valid phone number
+          </p>
         </div>
 
         <!-- PASSWORD -->
@@ -159,42 +227,75 @@
             #passwordCtrl="ngModel"
             placeholder="Min 8 characters"
             (input)="onPasswordInput()"
-            [class]="'w-full border rounded px-3 py-2 pr-10 outline-none transition-colors ' +
+            [class]="
+              'w-full border rounded px-3 py-2 pr-10 outline-none transition-colors ' +
               ((passwordCtrl.invalid && passwordCtrl.touched) || serverFieldErrors['password']
-                ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+                ? 'border-red-400 bg-red-50'
+                : 'border-gray-300 focus:border-[#0F5D2F]')
+            "
           />
-          <button type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  (click)="showPassword = !showPassword"
-                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
-            <svg *ngIf="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-width="1.8" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+          <button
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <svg
+              *ngIf="!showPassword"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-width="1.8" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" stroke-width="1.8" />
             </svg>
-            <svg *ngIf="showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-width="1.8" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-              <line x1="1" y1="1" x2="23" y2="23" stroke-width="1.8"/>
+            <svg
+              *ngIf="showPassword"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-width="1.8"
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+              />
+              <line x1="1" y1="1" x2="23" y2="23" stroke-width="1.8" />
             </svg>
           </button>
         </div>
 
         <!-- Strength bar -->
         <div *ngIf="form.password" class="flex gap-1 mt-1.5">
-          <div *ngFor="let i of [1,2,3,4]"
-               class="h-1 flex-1 rounded-full transition-all duration-300"
-               [class]="passwordStrength >= i ? strengthBarClass : 'bg-gray-200'">
-          </div>
+          <div
+            *ngFor="let i of [1, 2, 3, 4]"
+            class="h-1 flex-1 rounded-full transition-all duration-300"
+            [class]="passwordStrength >= i ? strengthBarClass : 'bg-gray-200'"
+          ></div>
         </div>
         <div class="min-h-[15px] mt-0.5 mb-1">
-          <p *ngIf="form.password && !passwordCtrl.invalid" [class]="'text-[10px] ' + strengthColorClass">
+          <p
+            *ngIf="form.password && !passwordCtrl.invalid"
+            [class]="'text-[10px] ' + strengthColorClass"
+          >
             {{ strengthLabel }}
           </p>
-          <p *ngIf="passwordCtrl.touched && passwordCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Password is required</p>
-          <p *ngIf="passwordCtrl.touched && passwordCtrl.hasError('minlength')"
-             class="text-red-600 text-[10px]">Password must be at least 8 characters</p>
-          <p *ngIf="serverFieldErrors['password']"
-             class="text-red-600 text-[10px]">{{ serverFieldErrors['password'] }}</p>
+          <p
+            *ngIf="passwordCtrl.touched && passwordCtrl.hasError('required')"
+            class="text-red-600 text-[10px]"
+          >
+            Password is required
+          </p>
+          <p
+            *ngIf="passwordCtrl.touched && passwordCtrl.hasError('minlength')"
+            class="text-red-600 text-[10px]"
+          >
+            Password must be at least 8 characters
+          </p>
+          <p *ngIf="serverFieldErrors['password']" class="text-red-600 text-[10px]">
+            {{ serverFieldErrors['password'] }}
+          </p>
         </div>
 
         <!-- CONFIRM PASSWORD -->
@@ -208,46 +309,102 @@
             #confirmCtrl="ngModel"
             placeholder="Re-enter your password"
             (input)="onConfirmInput()"
-            [class]="'w-full border rounded px-3 py-2 pr-10 outline-none transition-colors ' +
+            [class]="
+              'w-full border rounded px-3 py-2 pr-10 outline-none transition-colors ' +
               ((confirmCtrl.touched && confirmCtrl.hasError('required')) || passwordMismatch
-                ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-[#0F5D2F]')"
+                ? 'border-red-400 bg-red-50'
+                : 'border-gray-300 focus:border-[#0F5D2F]')
+            "
           />
-          <button type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  (click)="showConfirmPassword = !showConfirmPassword"
-                  [attr.aria-label]="showConfirmPassword ? 'Hide' : 'Show'">
-            <svg *ngIf="!showConfirmPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-width="1.8" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+          <button
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            (click)="showConfirmPassword = !showConfirmPassword"
+            [attr.aria-label]="showConfirmPassword ? 'Hide' : 'Show'"
+          >
+            <svg
+              *ngIf="!showConfirmPassword"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-width="1.8" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" stroke-width="1.8" />
             </svg>
-            <svg *ngIf="showConfirmPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-width="1.8" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-              <line x1="1" y1="1" x2="23" y2="23" stroke-width="1.8"/>
+            <svg
+              *ngIf="showConfirmPassword"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-width="1.8"
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+              />
+              <line x1="1" y1="1" x2="23" y2="23" stroke-width="1.8" />
             </svg>
           </button>
         </div>
         <div class="min-h-[15px] mt-0.5 mb-2">
-          <p *ngIf="confirmCtrl.touched && confirmCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Please confirm your password</p>
-          <p *ngIf="passwordMismatch && !confirmCtrl.hasError('required')"
-             class="text-red-600 text-[10px]">Passwords do not match</p>
+          <p
+            *ngIf="confirmCtrl.touched && confirmCtrl.hasError('required')"
+            class="text-red-600 text-[10px]"
+          >
+            Please confirm your password
+          </p>
+          <p
+            *ngIf="passwordMismatch && !confirmCtrl.hasError('required')"
+            class="text-red-600 text-[10px]"
+          >
+            Passwords do not match
+          </p>
         </div>
 
         <!-- TERMS -->
-        <label class="flex items-start gap-2 text-[11px] mb-3 cursor-pointer select-none">
-          <input type="checkbox" name="agree" [(ngModel)]="agree" class="mt-0.5 accent-[#0F5D2F]" />
-          <span>Agree to <a href="#" class="text-[#0F5D2F] underline">Terms &amp; Conditions</a></span>
-        </label>
+        <div class="flex items-start gap-2 text-[11px] mb-3 select-none">
+          <input
+            id="agreeTerms"
+            type="checkbox"
+            name="agree"
+            [(ngModel)]="agree"
+            class="mt-0.5 accent-[#0F5D2F]"
+          />
+
+          <div>
+            <label for="agreeTerms" class="cursor-pointer">Agree to</label>
+
+            <button
+              type="button"
+              (click)="openTermsModal()"
+              class="text-[#0F5D2F] underline font-medium"
+            >
+              Terms &amp; Conditions
+            </button>
+          </div>
+        </div>
 
         <!-- SUBMIT BUTTON -->
         <button
           type="submit"
           [disabled]="loading"
-          class="w-full bg-[#0F5D2F] text-white py-2 rounded hover:bg-[#0d4f28] transition-colors
-                 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          class="w-full bg-[#0F5D2F] text-white py-2 rounded hover:bg-[#0d4f28] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
           <svg *ngIf="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
           </svg>
           {{ loading ? 'Creating account…' : 'Sign Up' }}
         </button>
@@ -259,17 +416,81 @@
           <div class="flex-1 h-px bg-gray-300"></div>
         </div>
 
-        
-
-         
-
         <!-- LOGIN LINK -->
         <p class="text-[11px] text-center mt-3">
           Already have an account?
           <a routerLink="/login" class="text-[#0F5D2F] font-medium hover:underline">Login</a>
         </p>
-
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS MODAL -->
+<div
+  *ngIf="showTermsModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+>
+  <div
+    class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeIn_.2s_ease-out]"
+  >
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">
+            {{ activeTerms?.title || 'Terms & Conditions' }}
+          </h2>
+
+          <p class="text-sm text-gray-500 mt-1">Please read carefully before continuing.</p>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeTermsModal()"
+          class="w-9 h-9 rounded-lg hover:bg-gray-100 text-gray-500 transition"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="max-h-[420px] overflow-y-auto px-6 py-5">
+      <div *ngIf="termsLoading" class="text-sm text-gray-500">Loading terms and conditions...</div>
+
+      <div
+        *ngIf="termsError"
+        class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm"
+      >
+        {{ termsError }}
+      </div>
+
+      <div
+        *ngIf="!termsLoading && !termsError && activeTerms"
+        class="text-sm leading-7 text-gray-700 whitespace-pre-line"
+      >
+        {{ activeTerms.content }}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-end gap-3">
+      <button
+        type="button"
+        (click)="closeTermsModal()"
+        class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        (click)="agree = true; closeTermsModal()"
+        class="px-5 py-2.5 rounded-xl bg-[#0F5D2F] text-white text-sm font-medium hover:bg-[#0c4d27] transition shadow-sm"
+      >
+        Agree
+      </button>
     </div>
   </div>
 </div>

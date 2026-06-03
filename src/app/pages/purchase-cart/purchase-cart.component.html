@@ -1,0 +1,84 @@
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Purchase Cart</h1>
+
+  <div *ngIf="cart.length === 0" class="bg-white rounded-xl shadow p-8 text-center">
+    <p class="text-gray-500 mb-4">Your purchase cart is empty.</p>
+    <a routerLink="/shop" class="bg-green-700 text-white px-5 py-2 rounded-lg">
+      Continue Shopping
+    </a>
+  </div>
+
+  <div *ngIf="cart.length > 0" class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-4">
+      <div
+        *ngFor="let item of cart"
+        class="bg-white rounded-xl shadow p-4 flex gap-4 items-center"
+      >
+        <img
+          [src]="item.imageUrl || 'assets/images/no-image.png'"
+          class="w-24 h-24 object-cover rounded-lg"
+        />
+
+        <div class="flex-1">
+          <h3 class="font-semibold text-gray-800">{{ item.productName }}</h3>
+          <p class="text-sm text-gray-500">{{ item.productCode }}</p>
+          <p class="text-sm text-gray-500">LKR {{ item.price | number }}</p>
+
+          <div class="flex items-center gap-3 mt-3">
+            <button
+              (click)="decrease(item.productId)"
+              class="w-8 h-8 rounded border text-gray-700"
+            >
+              -
+            </button>
+
+            <span class="font-medium">{{ item.quantity }}</span>
+
+            <button
+              (click)="increase(item.productId)"
+              class="w-8 h-8 rounded border text-gray-700"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="text-right">
+          <p class="font-semibold text-gray-800">
+            LKR {{ item.price * item.quantity | number }}
+          </p>
+
+          <button
+            (click)="remove(item.productId)"
+            class="text-red-600 text-sm mt-3"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 h-fit">
+      <h2 class="text-lg font-semibold mb-4">Order Summary</h2>
+
+      <div class="flex justify-between mb-3">
+        <span>Subtotal</span>
+        <span>LKR {{ subtotal | number }}</span>
+      </div>
+
+      <div class="flex justify-between mb-3 text-sm text-gray-500">
+        <span>Delivery</span>
+        <span>Calculated at checkout</span>
+      </div>
+
+      <hr class="my-4" />
+
+      <a
+        routerLink="/checkout"
+        class="block text-center bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-medium"
+      >
+        Checkout
+      </a>
+    </div>
+  </div>
+</div>

@@ -51,7 +51,7 @@
         <iframe
           *ngSwitchCase="'YOUTUBE'"
           class="w-full h-[420px]"
-          [src]="sanitizeYoutube(guide.mediaUrl)"
+         [src]="sanitizeYoutube(guide.mediaUrl || '')"
           frameborder="0"
           allowfullscreen>
         </iframe>
@@ -61,7 +61,7 @@
           *ngSwitchCase="'VIDEO'"
           class="w-full h-[420px] object-cover bg-black"
           controls
-          [src]="sanitizeVideo(guide.mediaUrl)">
+          [src]="sanitizeVideo(guide.mediaUrl || '')">
         </video>
 
         <!-- Image -->
