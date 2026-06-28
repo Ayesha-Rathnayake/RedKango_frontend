@@ -1,0 +1,211 @@
+<section class="min-h-screen bg-gradient-to-b from-green-50/70 via-white to-gray-50">
+  <!-- HERO -->
+  <section class="relative h-[300px] overflow-hidden">
+    <img
+      src="images/hero4.png"
+      alt="Camping Tips"
+      class="absolute inset-0 w-full h-full object-cover"
+    />
+
+    <div class="absolute inset-0 bg-green-900/55"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-green-950/60 via-green-900/30 to-transparent"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+      <div class="max-w-2xl text-white">
+        <div
+          class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full text-xs uppercase tracking-[0.2em] font-semibold"
+        >
+          <i class="fas fa-campground text-yellow-300"></i>
+          Camping Guides
+        </div>
+
+        <h1 class="mt-6 text-4xl md:text-5xl font-serif font-semibold leading-tight">
+          Camping Tips & Guides
+        </h1>
+
+        <p class="mt-5 text-white/90 text-sm md:text-base leading-relaxed max-w-xl">
+          Expert advice, tips, and guides for an unforgettable outdoor adventure.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section *ngIf="loading" class="py-24 text-center">
+    <svg class="animate-spin w-8 h-8 mx-auto text-green-700" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+    </svg>
+    <p class="mt-3 text-sm text-gray-500">Loading articles...</p>
+  </section>
+
+  <!-- ERROR -->
+  <section *ngIf="!loading && error" class="py-24 text-center">
+    <p class="text-red-500">{{ error }}</p>
+  </section>
+
+  <!-- ARTICLES LIST -->
+  <section *ngIf="!loading && !error" class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 lg:p-8">
+        <div class="mb-8">
+          <h2 class="text-lg md:text-xl text-gray-800 font-medium leading-relaxed">
+            Latest Camping Guides
+          </h2>
+
+          <p class="text-sm text-gray-500 mt-1">
+            Practical advice and inspiration for your next outdoor adventure.
+          </p>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="guides.length === 0" class="text-center py-16">
+          <i class="fas fa-book-open text-4xl mb-3 block text-gray-300"></i>
+          <p class="text-gray-500 text-sm">No articles published yet. Check back soon!</p>
+        </div>
+
+        <!-- Cards Grid -->
+        <div *ngIf="guides.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <article
+            *ngFor="let guide of displayedGuides"
+            class="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+          >
+            <div class="relative h-56 bg-gray-100 overflow-hidden">
+              <ng-container [ngSwitch]="guide.mediaType">
+                <iframe
+                  *ngIf="guide.mediaType === 'YOUTUBE' && guide.mediaUrl"
+                  [src]="sanitizeYoutube(guide.mediaUrl || '')"
+                  class="w-full h-full"
+                ></iframe>
+
+                <video
+                  *ngIf="guide.mediaType === 'VIDEO' && guide.mediaUrl"
+                  [src]="sanitizeVideo(guide.mediaUrl || '')"
+                  controls
+                  class="w-full h-full object-cover"
+                ></video>
+
+                <img
+                  *ngSwitchDefault
+                  [src]="guide.imageUrl || 'images/placeholder.png'"
+                  [alt]="guide.title"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </ng-container>
+            </div>
+
+            <div class="p-5 flex flex-col flex-1">
+              <div class="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                <span>{{ guide.author }}</span>
+                <span>·</span>
+                <span>{{ formatDate(guide.createdAt) }}</span>
+              </div>
+
+              <h3 class="font-bold text-gray-900 text-base leading-6 line-clamp-2 min-h-[48px]">
+                {{ guide.title }}
+              </h3>
+
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mt-3 mb-5">
+                {{ guide.summary }}
+              </p>
+
+              <div class="mt-auto flex items-center justify-between">
+                <span class="text-xs text-gray-400">
+                  {{ guide.readTime || '5 min read' }}
+                </span>
+
+                <button
+                  type="button"
+                  (click)="readGuide(guide)"
+                  class="inline-flex items-center gap-2 text-green-700 text-sm font-bold hover:text-green-800 transition"
+                >
+                  Read More
+                  <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- SHOW MORE / SHOW LESS -->
+        <div
+          *ngIf="guides.length > 0"
+          class="mt-10 pt-6 border-t border-gray-100 flex items-center justify-center gap-3"
+        >
+          <button
+            *ngIf="visibleCount < guides.length"
+            type="button"
+            (click)="loadMore()"
+            class="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-50 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-200"
+          >
+            <i class="fas fa-chevron-down text-xs"></i>
+            Show More
+
+            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
+              {{ guides.length - visibleCount }} more
+            </span>
+          </button>
+
+          <button
+            *ngIf="visibleCount >= guides.length && guides.length > 3"
+            type="button"
+            (click)="showLess()"
+            class="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-50 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-200"
+          >
+            <i class="fas fa-chevron-up text-xs"></i>
+            Show Less
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT INFO SECTION -->
+  <section class="pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-green-700 rounded-3xl px-6 py-12 md:py-14 text-center text-white shadow-lg">
+        <h2 class="text-3xl md:text-4xl font-serif mb-3">
+          Need Help Planning Your Adventure?
+        </h2>
+
+        <p class="text-sm opacity-90 max-w-2xl mx-auto mb-8">
+          Contact our team for rentals, camping guidance, and booking assistance.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
+          <div
+            class="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl py-6 px-5 text-center transition-all duration-300 hover:scale-105 hover:bg-white/20"
+          >
+            <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-3">
+              <i class="fas fa-map-marker-alt text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-semibold uppercase tracking-wide mb-2">Location</h3>
+            <p class="text-sm text-white/80 leading-relaxed">{{ settings.address }}</p>
+          </div>
+
+          <a
+            [href]="phoneLink"
+            class="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl py-6 px-5 text-center transition-all duration-300 hover:scale-105 hover:bg-white/20"
+          >
+            <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-3">
+              <i class="fas fa-phone-alt text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-semibold uppercase tracking-wide mb-2">Phone</h3>
+            <p class="text-sm text-white/80">{{ settings.phone }}</p>
+          </a>
+
+          <a
+            [href]="emailLink"
+            class="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl py-6 px-5 text-center transition-all duration-300 hover:scale-105 hover:bg-white/20"
+          >
+            <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center mb-3">
+              <i class="fas fa-envelope text-white text-lg"></i>
+            </div>
+            <h3 class="text-sm font-semibold uppercase tracking-wide mb-2">Email</h3>
+            <p class="text-sm text-white/80">{{ settings.email }}</p>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</section>

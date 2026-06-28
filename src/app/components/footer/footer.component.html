@@ -1,0 +1,74 @@
+<footer class="bg-[#1f1f1f] text-white border-t border-green-700/40">
+  <div class="max-w-7xl mx-auto px-6 py-10 text-center">
+
+    <!-- Social Icons -->
+    <div class="flex justify-center gap-4 mb-6">
+      <a *ngIf="settings.whatsappNumber"
+        [href]="whatsappLink" target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110">
+        <i class="fab fa-whatsapp"></i>
+      </a>
+      <a *ngIf="settings.facebookUrl"
+        [href]="settings.facebookUrl" target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a *ngIf="settings.instagramUrl"
+        [href]="settings.instagramUrl" target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a *ngIf="settings.youtubeUrl"
+        [href]="settings.youtubeUrl" target="_blank"
+        class="w-10 h-10 rounded-full bg-green-700 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110">
+        <i class="fab fa-youtube"></i>
+      </a>
+    </div>
+
+    <!-- Brand -->
+    <h2 class="text-2xl font-bold text-green-500 tracking-wide mb-3">
+      {{ settings.businessName | uppercase }}
+    </h2>
+
+    <p class="max-w-lg mx-auto text-sm text-gray-300 leading-relaxed mb-8">
+      {{ settings.tagline }}
+    </p>
+
+    <!-- Quick Links -->
+    <div class="flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm uppercase tracking-widest font-semibold mb-8">
+      <a routerLink="/rentals" class="hover:text-green-500 transition duration-300">Rentals</a>
+      <a routerLink="/shop" class="hover:text-green-500 transition duration-300">Shop</a>
+      <a routerLink="/camping-tips" class="hover:text-green-500 transition duration-300">Camping Tips</a>
+      <a routerLink="/reviews" class="hover:text-green-500 transition duration-300">Reviews</a>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-4 text-sm text-gray-300 text-center">
+      <a *ngIf="settings.phone" [href]="phoneLink"
+        class="flex items-center gap-2 hover:text-green-500 transition">
+        <i class="fas fa-phone-alt text-green-500"></i>
+        {{ settings.phone }}
+      </a>
+      <span class="hidden md:block text-gray-600" *ngIf="settings.phone && settings.email">|</span>
+      <a *ngIf="settings.email" [href]="emailLink"
+        class="flex items-center gap-2 hover:text-green-500 transition">
+        <i class="fas fa-envelope text-green-500"></i>
+        {{ settings.email }}
+      </a>
+      <span class="hidden md:block text-gray-600" *ngIf="settings.email && settings.address">|</span>
+      <span *ngIf="settings.address" class="flex items-center gap-2">
+        <i class="fas fa-map-marker-alt text-green-500"></i>
+        {{ settings.address }}
+      </span>
+      
+    </div>
+
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="border-t border-white/10 py-4 text-center">
+    <p class="text-xs tracking-wide text-gray-400">
+      © {{ currentYear }} {{ settings.businessName }}. All rights reserved.
+    </p>
+  </div>
+</footer>

@@ -1,9 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ChatAssistantComponent } from './components/chat-assistant/chat-assistant.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    ChatAssistantComponent
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

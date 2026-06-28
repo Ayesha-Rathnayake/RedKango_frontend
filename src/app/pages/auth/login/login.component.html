@@ -1,0 +1,187 @@
+<div class="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+  <div class="bg-white rounded-lg shadow-lg flex w-full max-w-3xl overflow-hidden">
+
+    <!-- IMAGE SECTION -->
+    <div class="hidden md:flex w-1/2 items-center justify-center bg-gray-50 p-4">
+      <img src="/images/login-illustration.png" class="max-w-sm" alt="Login Illustration" />
+    </div>
+
+    <!-- FORM SECTION -->
+    <div class="w-full md:w-1/2 bg-[#F7F6F1] p-5">
+      <h2 class="text-lg font-semibold text-[#0F5D2F] mb-1">Login</h2>
+      <p class="text-xs mb-4 text-gray-600">Login to your account</p>
+
+      <!-- Server error banner -->
+      <div *ngIf="errorMessage"
+           class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded px-3 py-2 mb-3 text-[11px]"
+           role="alert">
+        <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/>
+          <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/>
+        </svg>
+        <span>{{ errorMessage }}</span>
+      </div>
+<!-- Success banner -->
+<div *ngIf="successMessage"
+     class="flex items-start gap-2 bg-green-50 border border-green-200 text-green-800 rounded px-3 py-2 mb-3 text-[11px]"
+     role="alert">
+  <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+  </svg>
+  <span>{{ successMessage }}</span>
+</div>
+ 
+      <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" class="text-xs" novalidate>
+
+        <!-- EMAIL -->
+        <label class="block mb-1">Email</label>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          email
+          #emailCtrl="ngModel"
+          placeholder="you@example.com"
+          [class]="'w-full border rounded px-3 py-2 outline-none transition-colors ' +
+            (emailCtrl.invalid && emailCtrl.touched
+              ? 'border-red-400 bg-red-50 focus:border-red-400'
+              : 'border-gray-300 focus:border-[#0F5D2F]')"
+        />
+        <div class="min-h-[16px] mt-0.5 mb-1">
+          <p *ngIf="emailCtrl.touched && emailCtrl.hasError('required')"
+             class="text-red-600 text-[10px]">Email is required</p>
+          <p *ngIf="emailCtrl.touched && emailCtrl.hasError('email') && !emailCtrl.hasError('required')"
+             class="text-red-600 text-[10px]">Please enter a valid email address</p>
+        </div>
+
+        <!-- PASSWORD -->
+        <label class="block mb-1">Password</label>
+        <div class="relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            #passwordCtrl="ngModel"
+            placeholder="Your password"
+            [class]="'w-full border rounded px-3 py-2 pr-10 outline-none transition-colors ' +
+              (passwordCtrl.invalid && passwordCtrl.touched
+                ? 'border-red-400 bg-red-50 focus:border-red-400'
+                : 'border-gray-300 focus:border-[#0F5D2F]')"
+          />
+          <button type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  (click)="showPassword = !showPassword"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+            <svg *ngIf="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-width="1.8" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+            </svg>
+            <svg *ngIf="showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-width="1.8" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23" stroke-width="1.8"/>
+            </svg>
+          </button>
+        </div>
+        <div class="min-h-[16px] mt-0.5 mb-2">
+          <p *ngIf="passwordCtrl.touched && passwordCtrl.hasError('required')"
+             class="text-red-600 text-[10px]">Password is required</p>
+        </div>
+
+        <!-- REMEMBER ME / FORGOT PASSWORD -->
+        <div class="flex justify-between text-[11px] mb-3">
+          <label class="flex items-center gap-1 cursor-pointer">
+<input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe" class="accent-[#0F5D2F]" />            Remember me
+          </label>
+          <a routerLink="/forgot-password" class="text-[#0F5D2F] hover:underline">Forgot Password</a>
+        </div>
+
+        <!-- LOGIN BUTTON -->
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="w-full bg-[#0F5D2F] text-white py-2 rounded hover:bg-[#0d4f28] transition-colors
+                 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <svg *ngIf="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          {{ loading ? 'Logging in…' : 'Login' }}
+        </button>
+
+        <!-- ── Resend verification panel ──────────────────────────────────────── -->
+<!-- Auto-shown when: token expired redirect, invalid token, or backend
+     returns "Account not verified" on login attempt                      -->
+<div *ngIf="showResendForm"
+     class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
+
+  <p class="text-[11px] font-semibold text-amber-800 flex items-center gap-1.5">
+    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    Resend verification email
+  </p>
+
+  <p class="text-[10px] text-amber-700">
+    Enter your email and we'll send a fresh link (valid 60 min).
+  </p>
+
+  <p *ngIf="resendError" class="text-[10px] text-red-600 font-medium">{{ resendError }}</p>
+
+  <div class="flex gap-2">
+    <input
+      type="email"
+      [(ngModel)]="resendEmail"
+      [ngModelOptions]="{standalone: true}"
+      placeholder="your@email.com"
+      class="flex-1 min-w-0 border border-amber-300 bg-white rounded px-2 py-1.5
+             text-[11px] outline-none focus:border-amber-500"
+    />
+    <button
+      type="button"
+      (click)="resendVerification()"
+      [disabled]="resendLoading"
+      class="shrink-0 bg-amber-600 hover:bg-amber-700 disabled:opacity-60
+             text-white text-[11px] font-semibold px-3 py-1.5 rounded transition-colors">
+      <span *ngIf="!resendLoading">Send</span>
+      <span *ngIf="resendLoading" class="flex items-center gap-1">
+        <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+        </svg>
+        Sending…
+      </span>
+    </button>
+  </div>
+
+</div>
+
+<!-- Manual trigger — shown only when there's no error (clean state) -->
+<div *ngIf="!showResendForm && !errorMessage" class="mt-2 text-center">
+  <button type="button" (click)="toggleResendForm()"
+          class="text-[10px] text-gray-400 hover:text-gray-600 underline underline-offset-2">
+    Didn't receive a verification email?
+  </button>
+</div>
+
+        <!-- DIVIDER -->
+        <div class="flex items-center my-3">
+          <div class="flex-1 h-px bg-gray-300"></div>
+          <span class="px-3 text-[10px] text-gray-500">or</span>
+          <div class="flex-1 h-px bg-gray-300"></div>
+        </div>
+
+        <!-- SIGN UP LINK -->
+        <p class="text-[11px] text-center mt-3">
+          Don't have an account?
+          <a routerLink="/signup" class="text-[#0F5D2F] font-medium hover:underline">Sign Up</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+</div>
