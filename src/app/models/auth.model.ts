@@ -52,3 +52,8 @@ export interface JwtPayload {
   email?: string;
   roles?: string[];
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

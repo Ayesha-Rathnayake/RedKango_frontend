@@ -75,6 +75,12 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/rentals']);
   }
 
+  goToRentalProduct(productId: number): void {
+    this.router.navigate(['/rentals'], {
+      queryParams: { highlight: productId },
+    });
+  }
+
   goToRentals(): void {
     this.router.navigate(['/rentals']);
   }

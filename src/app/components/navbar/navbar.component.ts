@@ -1,13 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  NavigationEnd,
-} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { PurchaseCartService } from '../../services/purchase-cart.service';
 
 interface StoredCartItem {
   quantity?: number;
@@ -32,25 +28,33 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private auth: AuthService
+    private auth: AuthService,
+      private purchaseCartService: PurchaseCartService 
   ) {}
 
   ngOnInit(): void {
-    this.refreshNavbarState();
+  this.refreshNavbarState();
 
-    this.sub.add(
-      this.router.events
-        .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-        .subscribe(() => {
-          this.refreshNavbarState();
-          this.profileOpen = false;
-          this.cartOpen = false;
-          this.menuOpen = false;
-        })
-    );
+  // Instant purchase cart count updates
+  this.sub.add(
+    this.purchaseCartService.cart$.subscribe(() => {
+      this.purchaseCartCount = this.purchaseCartService.getCount();
+    })
+  );
 
-    window.addEventListener('storage', this.handleStorageChange);
-  }
+  this.sub.add(
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.refreshNavbarState();
+        this.profileOpen = false;
+        this.cartOpen = false;
+        this.menuOpen = false;
+      }),
+  );
+
+  window.addEventListener('storage', this.handleStorageChange);
+}
 
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
@@ -80,20 +84,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   goToPurchaseCart(): void {
     this.cartOpen = false;
-    this.router.navigate(['/cart'], {
-      queryParams: {
-        type: 'purchase',
-      },
-    });
+    this.menuOpen = false;
+    this.router.navigate(['/purchase-cart']);
   }
 
   goToRentalCart(): void {
     this.cartOpen = false;
-    this.router.navigate(['/cart'], {
-      queryParams: {
-        type: 'rental',
-      },
-    });
+    this.menuOpen = false;
+    this.router.navigate(['/rental-cart']);
   }
 
   onLogout(): void {
@@ -107,11 +105,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     window.removeEventListener('storage', this.handleStorageChange);
   }
 
-  private refreshNavbarState(): void {
-    this.isLoggedIn = this.auth.isLoggedIn();
-    this.purchaseCartCount = this.getCartCount('cart');
-    this.rentalCartCount = this.getCartCount('rentalCart');
-  }
+private refreshNavbarState(): void {
+  this.isLoggedIn = this.auth.isLoggedIn();
+  this.purchaseCartCount = this.getCartCount('redkango_purchase_cart');
+  this.rentalCartCount = this.getCartCount('rentalCart');
+}
 
   private get totalCartCount(): number {
     return this.purchaseCartCount + this.rentalCartCount;
@@ -120,8 +118,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   get cartCount(): number {
     return this.totalCartCount;
   }
-
-  private getCartCount(storageKey: 'cart' | 'rentalCart'): number {
+private getCartCount(storageKey: string): number {
     const savedCart = localStorage.getItem(storageKey);
 
     if (!savedCart) return 0;

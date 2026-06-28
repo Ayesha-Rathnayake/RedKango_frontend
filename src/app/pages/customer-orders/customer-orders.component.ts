@@ -3,6 +3,9 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { OrderResponse } from '../../models/purchase-cart.model';
+import { PaymentService } from '../../services/payment.service';
+import { PayHereInitResponse } from '../../models/payment.model';
+
 
 @Component({
   selector: 'app-customer-orders',
@@ -19,9 +22,12 @@ export class CustomerOrdersComponent implements OnInit {
   selectedOrderToCancel?: OrderResponse;
 
   orders: OrderResponse[] = [];
+  payingOrderId: number | null = null;
+
 
   constructor(
     private orderService: OrderService,
+       private paymentService: PaymentService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -47,6 +53,60 @@ export class CustomerOrdersComponent implements OnInit {
       },
     });
   }
+
+  payNow(order: OrderResponse): void {
+  this.payingOrderId = order.orderId;
+  this.errorMessage = '';
+
+  this.paymentService.initPayHerePayment({ orderId: order.orderId }).subscribe({
+    next: (payment) => {
+      this.payingOrderId = null;
+      this.redirectToPayHere(payment);
+    },
+    error: (err) => {
+      this.payingOrderId = null;
+      this.errorMessage = err.error?.message || 'Failed to initiate payment. Please try again.';
+      this.cdr.detectChanges();
+    },
+  });
+}
+
+private redirectToPayHere(payment: PayHereInitResponse): void {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = payment.checkoutUrl;
+
+  const fields: Record<string, string> = {
+    merchant_id: payment.merchantId,
+    return_url: payment.returnUrl,
+    cancel_url: payment.cancelUrl,
+    notify_url: payment.notifyUrl,
+    order_id: payment.orderId,
+    items: payment.items,
+    currency: payment.currency,
+    amount: payment.amount,
+    first_name: payment.firstName,
+    last_name: payment.lastName,
+    email: payment.email,
+    phone: payment.phone,
+    address: payment.address,
+    city: payment.city,
+    country: payment.country,
+    hash: payment.hash,
+  };
+
+  Object.entries(fields).forEach(([name, value]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value || '';
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
 
   canCancel(order: OrderResponse): boolean {
     return order.orderStatus === 'PENDING_PAYMENT';

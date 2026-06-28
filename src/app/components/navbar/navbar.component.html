@@ -170,6 +170,15 @@
               <i class="fas fa-box text-green-700 w-4"></i>
               My Orders
             </a>
+            <a
+              routerLink="/customer/rentals"
+              (click)="profileOpen = false"
+              class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-green-50 transition"
+            >
+              <i class="fas fa-campground text-green-700 w-4"></i>
+              My Rentals
+            </a>
+
             <button
               type="button"
               (click)="onLogout()"
@@ -247,6 +256,16 @@
         <i class="fas fa-box text-green-700"></i>
         <span>My Orders</span>
       </button>
+
+      <button
+        type="button"
+        routerLink="/customer/rentals"
+        class="w-full flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 transition text-left"
+      >
+        <i class="fas fa-campground text-green-700"></i>
+        <span>My Rentals</span>
+      </button>
+     
 
       <button
         type="button"

@@ -19,12 +19,15 @@ import { CheckoutComponent } from './pages/checkout/checkout.component';
 import { CustomerComponent } from './pages/customer/customer.component';
 import { GuideDetailComponent } from './pages/guides/guide-detail.component';
 import { OrderSummaryComponent } from './pages/order-summary/order-summary.component';
+import { BookingSummaryComponent } from './pages/booking-summary/booking-summary.component';
+
 import { PurchaseCartComponent } from './pages/purchase-cart/purchase-cart.component';
 import { CustomerOrdersComponent } from './pages/customer-orders/customer-orders.component';
 import { PaymentSuccessComponent } from './pages/payment-success/payment-success.component';
 import { PaymentCancelComponent } from './pages/payment-cancel/payment-cancel.component';
 import { RentalCheckoutComponent } from './pages/rental-checkout/rental-checkout.component';
 import { CustomerRentalsComponent } from './pages/customer-rentals/customer-rentals.component';
+import { RentalCartComponent } from './pages/rental-cart/rental-cart.component';
 
 import { authGuard, roleGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -57,7 +60,7 @@ export const routes: Routes = [
         component: RentalCheckoutComponent,
       },
       {
-        path: 'payment/success',
+        path: 'payment-success',
         canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
         component: PaymentSuccessComponent,
       },
@@ -71,6 +74,12 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
         component: OrderSummaryComponent,
       },
+            {
+        path: 'booking-summary/:bookingId',
+        canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
+        component: BookingSummaryComponent,
+      },
+
       {
         path: 'customer',
         canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
@@ -85,6 +94,11 @@ export const routes: Routes = [
         path: 'customer/rentals',
         canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
         component: CustomerRentalsComponent,
+      },
+      {
+        path: 'rental-cart',
+        canActivate: [authGuard, roleGuard('ROLE_CUSTOMER')],
+        component: RentalCartComponent,
       },
     ],
   },

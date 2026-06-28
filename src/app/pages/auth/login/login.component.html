@@ -32,12 +32,7 @@
   </svg>
   <span>{{ successMessage }}</span>
 </div>
-      <!--
-        KEY FIX: (ngSubmit)="login(loginForm)"  passes the NgForm to the method.
-        The old template had (ngSubmit)="login()" with no argument — so the
-        method received undefined and markAllAsTouched() crashed silently,
-        leaving loading=true forever.
-      -->
+ 
       <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" class="text-xs" novalidate>
 
         <!-- EMAIL -->

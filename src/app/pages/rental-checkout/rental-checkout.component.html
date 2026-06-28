@@ -77,10 +77,45 @@
             </div>
           </div>
         </div>
+        <!-- Collection Method -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 class="font-bold text-gray-800 mb-4">Collection Method</h2>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="deliveryMethod = 'DELIVERY'"
+              [ngClass]="{
+                'border-green-600 bg-green-50 text-green-700': deliveryMethod === 'DELIVERY',
+                'border-gray-200 text-gray-600 hover:border-gray-300': deliveryMethod !== 'DELIVERY'
+              }"
+              class="border-2 rounded-xl p-4 text-left transition"
+            >
+              <i class="fas fa-truck text-lg mb-2 block"></i>
+              <p class="font-semibold text-sm">Home Delivery</p>
+              <p class="text-xs mt-1 text-gray-500">LKR 1,000 delivery charge</p>
+            </button>
+
+            <button
+              type="button"
+              (click)="deliveryMethod = 'PICKUP'"
+              [ngClass]="{
+                'border-green-600 bg-green-50 text-green-700': deliveryMethod === 'PICKUP',
+                'border-gray-200 text-gray-600 hover:border-gray-300': deliveryMethod !== 'PICKUP'
+              }"
+              class="border-2 rounded-xl p-4 text-left transition"
+            >
+              <i class="fas fa-store text-lg mb-2 block"></i>
+              <p class="font-semibold text-sm">Store Pickup</p>
+              <p class="text-xs mt-1 text-gray-500">Free — collect from our store</p>
+            </button>
+          </div>
+        </div>
 
         <!-- Delivery Details -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div *ngIf="deliveryMethod === 'DELIVERY'" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h2 class="font-bold text-gray-800 mb-4">Delivery Details</h2>
+
 
           <div class="grid md:grid-cols-2 gap-4">
             <div>
@@ -186,10 +221,15 @@
               <span>LKR {{ subtotal | number }}</span>
             </div>
 
-            <div class="flex justify-between">
-              <span class="text-gray-500">Delivery Charge</span>
-              <span>LKR {{ deliveryCharge | number }}</span>
+                    <div class="flex justify-between">
+              <span class="text-gray-500">
+                {{ deliveryMethod === 'PICKUP' ? 'Collection' : 'Delivery Charge' }}
+              </span>
+              <span [class.text-green-600]="deliveryMethod === 'PICKUP'">
+                {{ deliveryMethod === 'PICKUP' ? 'Free' : 'LKR ' + (deliveryCharge | number) }}
+              </span>
             </div>
+
 
             <div class="flex justify-between">
               <span class="text-gray-500">Advance Payment 50%</span>
@@ -198,12 +238,13 @@
               </span>
             </div>
 
-            <div class="flex justify-between text-lg font-bold border-t pt-4">
-              <span>Pay Now</span>
-              <span class="text-green-700">
-                LKR {{ amountPayNow | number }}
-              </span>
-            </div>
+<div class="flex justify-between text-lg font-bold border-t pt-4">
+  <span>Pay Now (50% Advance)</span>
+  <span class="text-green-700">
+    LKR {{ amountPayNow | number }}
+  </span>
+</div>
+
 
             <div class="flex justify-between">
               <span class="text-gray-500">Remaining Balance</span>
@@ -211,9 +252,11 @@
             </div>
           </div>
 
-          <p class="text-xs text-gray-500 mt-4 leading-relaxed">
-            The remaining balance should be paid at pickup or delivery.
-          </p>
+<p class="text-xs text-gray-500 mt-4 leading-relaxed">
+  The remaining 50% balance{{ deliveryMethod === 'DELIVERY' ? ' + delivery charge' : '' }}
+  will be collected in cash at {{ deliveryMethod === 'PICKUP' ? 'store pickup' : 'delivery' }}.
+</p>
+
 
           <button
             type="button"

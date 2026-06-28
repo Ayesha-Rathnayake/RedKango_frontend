@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product.service';
@@ -63,14 +63,29 @@ export class RentalsComponent implements OnInit {
     private rentalBookingService: RentalBookingService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
+ngOnInit(): void {
     this.loadRentalProducts();
     this.loadRentalCart();
-  }
+    this.cdr.detectChanges();
 
+    this.route.queryParams.subscribe(params => {
+      const highlightId = params['highlight'];
+      if (highlightId) {
+        setTimeout(() => {
+          const el = document.getElementById('product-' + highlightId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('ring-2', 'ring-green-500');
+            setTimeout(() => el.classList.remove('ring-2', 'ring-green-500'), 2000);
+          }
+        }, 800); // wait for products to load
+      }
+    });
+  }
   // ── Pagination helpers ───────────────────────────────────────
   get visibleProducts(): Product[] {
     return this.filteredProducts.slice(0, this.visibleCount);
@@ -226,8 +241,18 @@ export class RentalsComponent implements OnInit {
     this.successMessage = '';
     this.availabilityChecked = false;
     this.availabilityMap = {};
-    this.rentalCartItems = [];
-    this.saveRentalCart();
+
+    // Only wipe the cart when the user picks DIFFERENT dates than what items were added for
+    const cartStartDate = this.rentalCartItems[0]?.startDate;
+    const cartEndDate = this.rentalCartItems[0]?.endDate;
+    const datesChanged =
+      this.rentalCartItems.length > 0 &&
+      (cartStartDate !== this.startDate || cartEndDate !== this.endDate);
+
+    if (datesChanged) {
+      this.rentalCartItems = [];
+      this.saveRentalCart();
+    }
   }
 
   filterProducts(): void {
@@ -351,6 +376,7 @@ export class RentalsComponent implements OnInit {
 
     this.saveRentalCart();
     this.isRentalCartOpen = true;
+    this.cdr.detectChanges();
   }
 
   toggleRentalCart(): void {
@@ -360,11 +386,18 @@ export class RentalsComponent implements OnInit {
     }
 
     this.isRentalCartOpen = !this.isRentalCartOpen;
+
+    // Always re-sync from localStorage when opening, in case items were added elsewhere
+    if (this.isRentalCartOpen) {
+      this.loadRentalCart();
+      this.cdr.detectChanges();
+    }
   }
 
   removeFromRentalCart(item: RentalCartItem): void {
     this.rentalCartItems = this.rentalCartItems.filter((cartItem) => cartItem.id !== item.id);
     this.saveRentalCart();
+    this.cdr.detectChanges();
   }
 
   incrementQuantity(item: RentalCartItem): void {
@@ -376,6 +409,7 @@ export class RentalsComponent implements OnInit {
     item.quantity++;
     item.totalPrice = item.quantity * item.price * item.totalDays;
     this.saveRentalCart();
+    this.cdr.detectChanges();
   }
 
   decrementQuantity(item: RentalCartItem): void {
@@ -383,6 +417,7 @@ export class RentalsComponent implements OnInit {
       item.quantity--;
       item.totalPrice = item.quantity * item.price * item.totalDays;
       this.saveRentalCart();
+      this.cdr.detectChanges();
       return;
     }
 
@@ -458,6 +493,12 @@ export class RentalsComponent implements OnInit {
 
     try {
       this.rentalCartItems = JSON.parse(savedCart) as RentalCartItem[];
+
+      // Restore dates from saved cart so the date inputs match the cart items
+      if (this.rentalCartItems.length > 0) {
+        this.startDate = this.rentalCartItems[0].startDate;
+        this.endDate = this.rentalCartItems[0].endDate;
+      }
     } catch {
       this.rentalCartItems = [];
     }

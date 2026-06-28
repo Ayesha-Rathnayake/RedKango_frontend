@@ -1,14 +1,15 @@
+
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { PurchaseCartService } from '../../services/purchase-cart.service';
 import { OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
 
 import { DeliveryAddress } from '../../models/purchase-cart.model';
-import { PayHereInitResponse } from '../../models/payment.model';
+import { PayHereInitResponse, PayHerePayment } from '../../models/payment.model';
 
 @Component({
   selector: 'app-checkout',
@@ -20,6 +21,7 @@ export class CheckoutComponent {
   loading = false;
   errorMessage = '';
   deliveryCharge = 1000;
+  private currentOrderDbId: number | null = null; // numeric DB id for routing
 
   address: DeliveryAddress = {
     fullName: '',
@@ -34,7 +36,8 @@ export class CheckoutComponent {
   constructor(
     private cartService: PurchaseCartService,
     private orderService: OrderService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private router: Router,
   ) {}
 
   get cart() {
@@ -42,10 +45,7 @@ export class CheckoutComponent {
   }
 
   get subtotal(): number {
-    return this.cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    return this.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
   get total(): number {
@@ -84,48 +84,48 @@ export class CheckoutComponent {
 
     this.orderService.createOrder(request).subscribe({
       next: (response) => {
-        this.paymentService
-          .initPayHerePayment({ orderId: response.orderId })
-          .subscribe({
-            next: (payment) => {
-              this.cartService.clear();
-              this.redirectToPayHere(payment);
-            },
-            error: (err) => {
-              console.error('Payment initialization failed', err);
-              this.loading = false;
-              this.errorMessage =
-                err.error?.message ||
-                'Payment initialization failed. Please try again.';
-            },
-          });
+        this.currentOrderDbId = response.orderId; // store numeric DB id
+
+        this.paymentService.initPayHerePayment({ orderId: response.orderId }).subscribe({
+          next: (payment) => {
+            this.cartService.clear();
+            this.startPayHerePayment(payment);
+          },
+          error: (err) => {
+            console.error('Payment initialization failed', err);
+            this.loading = false;
+            this.errorMessage =
+              err.error?.message || 'Payment initialization failed. Please try again.';
+          },
+        });
       },
       error: (err) => {
         console.error('Order creation failed', err);
         this.loading = false;
-        this.errorMessage =
-          err.error?.message ||
-          'Order creation failed. Please try again.';
+        this.errorMessage = err.error?.message || 'Order creation failed. Please try again.';
       },
     });
   }
 
-  private redirectToPayHere(payment: PayHereInitResponse): void {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = payment.checkoutUrl;
+  private startPayHerePayment(payment: PayHereInitResponse): void {
+    const payhere = window.payhere;
 
-    const fields: Record<string, string> = {
+    if (!payhere) {
+      this.errorMessage = 'Payment system not loaded. Please refresh and try again.';
+      this.loading = false;
+      return;
+    }
+
+    const paymentData: PayHerePayment = {
+      sandbox: true,
       merchant_id: payment.merchantId,
       return_url: payment.returnUrl,
       cancel_url: payment.cancelUrl,
       notify_url: payment.notifyUrl,
-
       order_id: payment.orderId,
       items: payment.items,
       currency: payment.currency,
       amount: payment.amount,
-
       first_name: payment.firstName,
       last_name: payment.lastName,
       email: payment.email,
@@ -133,19 +133,30 @@ export class CheckoutComponent {
       address: payment.address,
       city: payment.city,
       country: payment.country,
-
       hash: payment.hash,
     };
 
-    Object.entries(fields).forEach(([name, value]) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value || '';
-      form.appendChild(input);
-    });
+    payhere.onCompleted = (orderId: string) => {
+      console.log('Payment completed callback:', orderId);
+      this.loading = false;
+      this.router.navigate(['/payment-success'], {
+        queryParams: {
+          orderId: this.currentOrderDbId,
+          type: 'order',
+        },
+      });
+    };
 
-    document.body.appendChild(form);
-    form.submit();
+    payhere.onDismissed = () => {
+      this.loading = false;
+    };
+
+    payhere.onError = (error: unknown) => {
+      console.error('PayHere error:', error);
+      this.loading = false;
+      this.errorMessage = 'Payment failed. Please try again.';
+    };
+
+    payhere.startPayment(paymentData);
   }
 }

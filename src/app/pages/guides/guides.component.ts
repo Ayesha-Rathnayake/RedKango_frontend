@@ -6,6 +6,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CampingTipService } from '../../services/camping-tip.service';
 import { CampingTip } from '../../models/camping-tip.model';
+import { SiteSettingsService, DEFAULT_SITE_SETTINGS } from '../../services/site-settings.service';
+import { SiteSettings } from '../../models/site-settings.model';
 
 @Component({
   selector: 'app-guides',
@@ -17,22 +19,39 @@ export class GuidesComponent implements OnInit {
   guides: CampingTip[] = [];
   loading = true;
   error = '';
-
   visibleCount = 3;
+
+  settings: SiteSettings = DEFAULT_SITE_SETTINGS;
 
   constructor(
     private router: Router,
     private sanitizer: DomSanitizer,
     private campingTipService: CampingTipService,
+    private siteSettingsService: SiteSettingsService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadGuides();
+    this.siteSettingsService.get().subscribe({
+      next: (s) => {
+        this.settings = s;
+        this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
   }
 
   get displayedGuides(): CampingTip[] {
     return this.guides.slice(0, this.visibleCount);
+  }
+
+  get phoneLink(): string {
+    return `tel:${this.settings.phone}`;
+  }
+
+  get emailLink(): string {
+    return `mailto:${this.settings.email}`;
   }
 
   loadGuides(): void {
@@ -48,15 +67,12 @@ export class GuidesComponent implements OnInit {
       },
       error: (err: unknown) => {
         console.error('Failed to load guides', err);
-
         this.loading = false;
-
         if (err instanceof HttpErrorResponse) {
           this.error = err.error?.message || 'Failed to load articles.';
         } else {
           this.error = 'Cannot reach the server.';
         }
-
         this.cdr.detectChanges();
       },
     });
@@ -65,9 +81,10 @@ export class GuidesComponent implements OnInit {
   loadMore(): void {
     this.visibleCount += 3;
   }
+
   showLess(): void {
-  this.visibleCount = 3;
-}
+    this.visibleCount = 3;
+  }
 
   readGuide(guide: CampingTip): void {
     this.router.navigate(['/camping-tips', guide.slug || guide.id]);
@@ -75,7 +92,6 @@ export class GuidesComponent implements OnInit {
 
   sanitizeYoutube(url: string): SafeResourceUrl {
     const id = this.extractYoutubeId(url);
-
     return this.sanitizer.bypassSecurityTrustResourceUrl(
       `https://www.youtube.com/embed/${id}`
     );
@@ -87,18 +103,13 @@ export class GuidesComponent implements OnInit {
 
   extractYoutubeId(url: string): string {
     if (!url) return '';
-
-    const regex =
-      /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{6,})/;
-
+    const regex = /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{6,})/;
     const match = url.match(regex);
-
     return match ? match[1] : '';
   }
 
   formatDate(dateStr?: string): string {
     if (!dateStr) return '';
-
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',

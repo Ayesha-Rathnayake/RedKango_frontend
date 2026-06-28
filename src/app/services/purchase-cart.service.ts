@@ -9,7 +9,7 @@ export class PurchaseCartService {
   private readonly storageKey = 'redkango_purchase_cart';
 
   private cartSubject = new BehaviorSubject<PurchaseCartItem[]>(this.getCart());
-  cart$ = this.cartSubject.asObservable();
+  cart$ = this.cartSubject.asObservable();  
 
   getCart(): PurchaseCartItem[] {
     const cart = localStorage.getItem(this.storageKey);
@@ -59,6 +59,7 @@ export class PurchaseCartService {
   clear(): void {
     localStorage.removeItem(this.storageKey);
     this.cartSubject.next([]);
+     window.dispatchEvent(new Event('storage'));
   }
 
   getSubtotal(): number {
@@ -72,5 +73,6 @@ export class PurchaseCartService {
   private save(cart: PurchaseCartItem[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(cart));
     this.cartSubject.next(cart);
+     window.dispatchEvent(new Event('storage'));
   }
 }

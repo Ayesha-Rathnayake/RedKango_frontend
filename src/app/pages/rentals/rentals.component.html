@@ -8,7 +8,9 @@
     />
 
     <div class="absolute inset-0 bg-black/45"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-green-950/60 via-green-900/30 to-transparent"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-green-950/60 via-green-900/30 to-transparent"
+    ></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
       <div class="max-w-2xl text-white">
@@ -35,9 +37,7 @@
     <div class="bg-white rounded-3xl shadow-lg border border-gray-100 px-6 py-5">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
         <div class="w-full">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">
-            Start Date
-          </label>
+          <label class="block text-xs font-semibold text-gray-600 mb-2"> Start Date </label>
           <input
             type="date"
             [(ngModel)]="startDate"
@@ -47,9 +47,7 @@
         </div>
 
         <div class="w-full">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">
-            End Date
-          </label>
+          <label class="block text-xs font-semibold text-gray-600 mb-2"> Return Date </label>
           <input
             type="date"
             [(ngModel)]="endDate"
@@ -71,9 +69,7 @@
         </div>
 
         <div class="w-full relative">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">
-            Search
-          </label>
+          <label class="block text-xs font-semibold text-gray-600 mb-2"> Search </label>
           <i
             class="fas fa-search absolute left-4 top-[42px] -translate-y-1/2 text-gray-400 text-sm"
           ></i>
@@ -87,9 +83,7 @@
         </div>
 
         <div class="w-full">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">
-            Sort
-          </label>
+          <label class="block text-xs font-semibold text-gray-600 mb-2"> Sort </label>
           <select
             [(ngModel)]="sortBy"
             (change)="sortProducts()"
@@ -109,8 +103,17 @@
         class="mt-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm"
       >
         <i class="fas fa-info-circle mr-2"></i>
-        Please select your rental start date and end date, then click
+        Please select your rental start date and return date, then click
         <strong>Check Availability</strong> to view available rental equipment.
+      </div>
+
+      <div
+        *ngIf="availabilityChecked && getRentalDays() > 0"
+        class="mt-3 bg-gray-50 border border-gray-200 text-gray-500 px-4 py-2.5 rounded-xl text-xs"
+      >
+        <i class="fas fa-circle-info mr-1.5"></i>
+        You will be charged for all days between your start date and return date.
+        <strong class="text-gray-700">{{ getRentalDays() }} day(s)</strong> selected.
       </div>
 
       <div
@@ -181,6 +184,7 @@
       >
         <div
           *ngFor="let product of visibleProducts"
+          [id]="'product-' + product.id"
           class="group bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
         >
           <div class="relative h-56 bg-gray-100 overflow-hidden">
@@ -193,9 +197,12 @@
             <span
               class="absolute top-3 left-3 text-xs px-3 py-1 rounded-full font-bold shadow-sm"
               [ngClass]="{
-                'bg-green-50 text-green-700 border border-green-100': getRentalStockLabel(product) === 'Available',
-                'bg-yellow-50 text-yellow-700 border border-yellow-100': getRentalStockLabel(product) === 'Running Out',
-                'bg-red-50 text-red-700 border border-red-100': getRentalStockLabel(product) === 'Unavailable'
+                'bg-green-50 text-green-700 border border-green-100':
+                  getRentalStockLabel(product) === 'Available',
+                'bg-yellow-50 text-yellow-700 border border-yellow-100':
+                  getRentalStockLabel(product) === 'Running Out',
+                'bg-red-50 text-red-700 border border-red-100':
+                  getRentalStockLabel(product) === 'Unavailable',
               }"
             >
               {{ availabilityChecked ? getRentalStockLabel(product) : 'Select Dates' }}
@@ -217,9 +224,7 @@
 
             <div class="mt-3 flex items-center justify-between text-xs">
               <span class="text-gray-500">Selected dates</span>
-              <span class="font-semibold text-gray-700">
-                {{ getRentalDays() || 0 }} day(s)
-              </span>
+              <span class="font-semibold text-gray-700"> {{ getRentalDays() || 0 }} day(s) </span>
             </div>
 
             <div class="mt-2 flex items-center justify-between text-xs">
@@ -259,7 +264,10 @@
         </div>
       </div>
 
-      <div *ngIf="!loading && filteredProducts.length === 0" class="py-16 text-center text-gray-400">
+      <div
+        *ngIf="!loading && filteredProducts.length === 0"
+        class="py-16 text-center text-gray-400"
+      >
         <i class="fas fa-search text-4xl mb-3 block text-gray-300"></i>
         <p class="text-sm">No rental products found.</p>
       </div>
@@ -292,9 +300,10 @@
           Show Less
         </button>
       </div>
-
-    </div><!-- closes: bg-white rounded-3xl inner card -->
-  </div><!-- closes: max-w-7xl RENTAL PRODUCTS outer wrapper -->
+    </div>
+    <!-- closes: bg-white rounded-3xl inner card -->
+  </div>
+  <!-- closes: max-w-7xl RENTAL PRODUCTS outer wrapper -->
 
   <!-- RENTAL CART SIDEBAR -->
   <div *ngIf="isRentalCartOpen" class="fixed inset-0 z-50">
@@ -304,12 +313,14 @@
       <div class="flex items-center justify-between p-6 border-b">
         <div>
           <h2 class="text-xl font-bold text-gray-900">Rental Cart</h2>
-          <p class="text-xs text-gray-500 mt-1">
-            {{ startDate }} to {{ endDate }}
-          </p>
+          <p class="text-xs text-gray-500 mt-1">{{ startDate }} to {{ endDate }}</p>
         </div>
 
-        <button type="button" (click)="toggleRentalCart()" class="text-gray-500 hover:text-gray-800">
+        <button
+          type="button"
+          (click)="toggleRentalCart()"
+          class="text-gray-500 hover:text-gray-800"
+        >
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -338,16 +349,16 @@
                 {{ item.startDate }} to {{ item.endDate }} · {{ item.totalDays }} day(s)
               </p>
 
-              <p class="text-green-700 font-bold">
-                LKR {{ item.totalPrice | number }}
-              </p>
+              <p class="text-green-700 font-bold">LKR {{ item.totalPrice | number }}</p>
 
-              <p class="text-xs text-gray-400">
-                Available: {{ item.availableUnitsForDates }}
-              </p>
+              <p class="text-xs text-gray-400">Available: {{ item.availableUnitsForDates }}</p>
 
               <div class="flex items-center gap-3 mt-2">
-                <button type="button" (click)="decrementQuantity(item)" class="w-7 h-7 border rounded">
+                <button
+                  type="button"
+                  (click)="decrementQuantity(item)"
+                  class="w-7 h-7 border rounded"
+                >
                   -
                 </button>
 
@@ -435,9 +446,12 @@
             <span
               class="inline-flex text-xs px-3 py-1 rounded-full font-bold"
               [ngClass]="{
-                'bg-green-50 text-green-700 border border-green-100': getRentalStockLabel(selectedProduct) === 'Available',
-                'bg-yellow-50 text-yellow-700 border border-yellow-100': getRentalStockLabel(selectedProduct) === 'Running Out',
-                'bg-red-50 text-red-700 border border-red-100': getRentalStockLabel(selectedProduct) === 'Unavailable'
+                'bg-green-50 text-green-700 border border-green-100':
+                  getRentalStockLabel(selectedProduct) === 'Available',
+                'bg-yellow-50 text-yellow-700 border border-yellow-100':
+                  getRentalStockLabel(selectedProduct) === 'Running Out',
+                'bg-red-50 text-red-700 border border-red-100':
+                  getRentalStockLabel(selectedProduct) === 'Unavailable',
               }"
             >
               {{ availabilityChecked ? getRentalStockLabel(selectedProduct) : 'Select Dates' }}
@@ -453,7 +467,10 @@
             </p>
 
             <p class="mt-4 text-gray-600 leading-relaxed">
-              {{ selectedProduct.description || 'Reliable rental equipment suitable for outdoor adventures.' }}
+              {{
+                selectedProduct.description ||
+                  'Reliable rental equipment suitable for outdoor adventures.'
+              }}
             </p>
 
             <div class="mt-5 bg-gray-50 rounded-xl p-4 text-sm">
@@ -481,7 +498,11 @@
               "
             >
               <i class="fas fa-calendar-plus text-sm"></i>
-              {{ isRentalAvailable(selectedProduct) ? 'Add to Rental Cart' : 'Check Availability First' }}
+              {{
+                isRentalAvailable(selectedProduct)
+                  ? 'Add to Rental Cart'
+                  : 'Check Availability First'
+              }}
             </button>
           </div>
         </div>
@@ -491,10 +512,7 @@
 
   <!-- AUTH REQUIRED MODAL -->
   <div *ngIf="showAuthRequiredModal" class="fixed inset-0 z-[9999]">
-    <div
-      class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      (click)="closeAuthModal()"
-    ></div>
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeAuthModal()"></div>
 
     <div class="relative min-h-screen flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -514,7 +532,8 @@
 
         <div class="p-6">
           <p class="text-gray-600 text-center leading-relaxed">
-            To add rental items to your cart and complete bookings, you need a RedKango customer account.
+            To add rental items to your cart and complete bookings, you need a RedKango customer
+            account.
           </p>
 
           <div class="mt-6 space-y-3">
@@ -546,5 +565,4 @@
       </div>
     </div>
   </div>
-
 </section>

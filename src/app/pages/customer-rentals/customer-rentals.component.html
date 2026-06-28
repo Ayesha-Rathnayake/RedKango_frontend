@@ -1,27 +1,33 @@
-<section class="min-h-screen bg-gray-50 py-10">
-  <div class="max-w-7xl mx-auto px-4">
+<section class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-6xl mx-auto px-4">
 
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800">
-        My Rentals
-      </h1>
-
-      <p class="text-gray-500 mt-2">
-        View and track all your rental bookings.
-      </p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">My Rentals</h1>
+      <p class="text-sm text-gray-500 mt-1">View and track all your rental bookings.</p>
     </div>
 
-    <!-- LOADING -->
-    <div *ngIf="loading" class="text-center py-20">
-      <i class="fas fa-spinner fa-spin text-3xl text-green-700"></i>
+    <!-- SUCCESS -->
+    <div
+      *ngIf="successMessage"
+      class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm"
+    >
+      <i class="fas fa-check-circle mr-2"></i>
+      {{ successMessage }}
     </div>
 
     <!-- ERROR -->
     <div
       *ngIf="errorMessage"
-      class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl"
+      class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
     >
+      <i class="fas fa-exclamation-circle mr-2"></i>
       {{ errorMessage }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="bg-white rounded-2xl shadow p-10 text-center">
+      <i class="fas fa-spinner fa-spin text-3xl text-green-700"></i>
+      <p class="text-gray-500 mt-3">Loading your rentals...</p>
     </div>
 
     <!-- EMPTY -->
@@ -30,147 +36,226 @@
       class="bg-white rounded-2xl shadow p-10 text-center"
     >
       <i class="fas fa-campground text-5xl text-gray-300 mb-4"></i>
-
-      <h2 class="text-xl font-semibold text-gray-700">
-        No Rental Bookings Found
-      </h2>
-
-      <p class="text-gray-500 mt-2">
-        You haven't placed any rental bookings yet.
-      </p>
+      <h2 class="text-lg font-semibold text-gray-700">No Rental Bookings Found</h2>
+      <p class="text-gray-500 mt-2">You haven't placed any rental bookings yet.</p>
+     <a 
+        routerLink="/rentals"
+        class="inline-block mt-5 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl font-semibold"
+      >
+        Browse Rentals
+      </a>
     </div>
 
-    <!-- RENTALS -->
-    <div *ngIf="!loading && rentals.length > 0" class="space-y-6">
-
+    <!-- RENTALS LIST -->
+    <div *ngIf="!loading && rentals.length > 0" class="space-y-4">
       <div
         *ngFor="let rental of rentals"
-        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
       >
         <!-- Header -->
-        <div class="bg-green-700 text-white px-6 py-4">
-          <div class="flex flex-col md:flex-row md:justify-between">
-            <div>
-              <h3 class="font-bold">
-                {{ rental.bookingNumber }}
-              </h3>
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+          <div>
+            <h2 class="font-bold text-gray-800">{{ rental.bookingNumber }}</h2>
+            <p class="text-sm text-gray-500 mt-0.5">
+              {{ rental.rentalStartDate | date: 'mediumDate' }}
+              →
+              {{ rental.rentalEndDate | date: 'mediumDate' }}
+            </p>
+          </div>
 
-              <p class="text-green-100 text-sm mt-1">
-                {{ rental.rentalStartDate }}
-                →
-                {{ rental.rentalEndDate }}
-              </p>
-            </div>
+          <div class="flex flex-wrap gap-2">
+            <span
+              class="text-xs px-3 py-1 rounded-full border font-semibold"
+              [ngClass]="getStatusClass(rental.bookingStatus)"
+            >
+              {{ rental.bookingStatus }}
+            </span>
+            <span
+              class="text-xs px-3 py-1 rounded-full border font-semibold"
+              [ngClass]="getStatusClass(rental.paymentStatus)"
+            >
+              Payment: {{ rental.paymentStatus }}
+            </span>
+          </div>
+        </div>
 
-            <div class="mt-3 md:mt-0 text-right">
-              <p class="text-sm">
-                Status
-              </p>
-
-              <p class="font-bold">
-                {{ rental.bookingStatus }}
+        <!-- Rental Items -->
+        <div class="mt-4 border-t pt-3">
+          <div class="space-y-2">
+            <div
+              *ngFor="let item of rental.items"
+              class="flex items-center justify-between gap-4"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <img
+                  [src]="item.imageUrl || 'images/products/placeholder.png'"
+                  [alt]="item.productName"
+                  class="w-10 h-10 object-cover rounded-lg bg-gray-100 flex-shrink-0"
+                />
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-800 truncate">{{ item.productName }}</p>
+                  <p class="text-sm text-gray-500">Qty: {{ item.quantity }}</p>
+                </div>
+              </div>
+              <p class="font-semibold text-gray-800 whitespace-nowrap">
+                LKR {{ item.lineTotal | number }}
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Body -->
-        <div class="p-6">
+        <!-- Tracking -->
+        <div
+          *ngIf="rental.trackingNumber"
+          class="mt-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3"
+        >
+          <div class="flex items-center gap-2 text-blue-700 font-semibold text-sm">
+            <i class="fas fa-truck"></i>
+            <span>Shipment Tracking</span>
+          </div>
+          <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-5 text-sm">
+            <span>
+              <span class="text-gray-500">Courier:</span>
+              <span class="font-semibold text-gray-800 ml-1">{{ rental.courierName }}</span>
+            </span>
+            <span>
+              <span class="text-gray-500">Tracking:</span>
+              <span class="font-semibold text-gray-800 ml-1">{{ rental.trackingNumber }}</span>
+            </span>
+          </div>
+        </div>
 
-          <div class="grid md:grid-cols-4 gap-4 mb-6">
-
+        <!-- Total + Amounts + Actions -->
+        <div
+          class="mt-4 border-t pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
+          <div class="flex flex-wrap gap-6">
             <div>
-              <p class="text-xs text-gray-500 uppercase">
-                Total Amount
-              </p>
-
-              <p class="font-semibold">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Total Amount</p>
+              <p class="text-2xl font-bold text-green-700">
                 LKR {{ rental.totalAmount | number }}
               </p>
             </div>
-
             <div>
-              <p class="text-xs text-gray-500 uppercase">
-                Advance Paid
-              </p>
-
-              <p class="font-semibold text-green-700">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Advance Paid</p>
+              <p class="text-lg font-semibold text-gray-800">
                 LKR {{ rental.advanceAmount | number }}
               </p>
             </div>
-
             <div>
-              <p class="text-xs text-gray-500 uppercase">
-                Remaining
-              </p>
-
-              <p class="font-semibold text-orange-600">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Remaining</p>
+              <p class="text-lg font-semibold text-orange-600">
                 LKR {{ rental.remainingAmount | number }}
               </p>
             </div>
-
-            <div>
-              <p class="text-xs text-gray-500 uppercase">
-                Payment Status
-              </p>
-
-              <p class="font-semibold">
-                {{ rental.paymentStatus }}
-              </p>
-            </div>
-
           </div>
 
-          <!-- Rental Items -->
-          <div class="border-t pt-4">
-
-            <h4 class="font-semibold text-gray-800 mb-3">
-              Rental Items
-            </h4>
-
-            <div
-              *ngFor="let item of rental.items"
-              class="flex items-center gap-4 py-3 border-b last:border-b-0"
+                   <div class="flex flex-wrap gap-2">
+            <a
+              [routerLink]="['/booking-summary', rental.bookingId]"
+              class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold text-sm"
             >
-              <img
-                [src]="item.imageUrl"
-                class="w-16 h-16 object-cover rounded-lg bg-gray-100"
-              />
+              View Details
+            </a>
 
-              <div class="flex-1">
-                <h5 class="font-medium">
-                  {{ item.productName }}
-                </h5>
+            <button
+              *ngIf="rental.bookingStatus === 'PENDING_PAYMENT' && rental.paymentStatus === 'PENDING'"
+              type="button"
+              (click)="payNow(rental)"
+              [disabled]="payingBookingId === rental.bookingId"
+              class="px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white font-semibold text-sm flex items-center gap-2"
+            >
+              <i *ngIf="payingBookingId === rental.bookingId" class="fas fa-spinner fa-spin text-xs"></i>
+              {{ payingBookingId === rental.bookingId ? 'Processing...' : 'Pay Now' }}
+            </button>
 
-                <p class="text-sm text-gray-500">
-                  Qty: {{ item.quantity }}
-                </p>
-              </div>
-
-              <div class="font-semibold">
-                LKR {{ item.lineTotal | number }}
-              </div>
-            </div>
-
+            <button
+              *ngIf="canCancel(rental)"
+              type="button"
+              (click)="openCancelModal(rental)"
+              class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm"
+            >
+              Cancel Booking
+            </button>
           </div>
 
-          <!-- Tracking -->
-          <div
-            *ngIf="rental.trackingNumber"
-            class="mt-5 bg-blue-50 border border-blue-100 rounded-xl p-4"
-          >
-            <p class="font-semibold text-blue-800">
-              Courier: {{ rental.courierName }}
-            </p>
-
-            <p class="text-blue-700">
-              Tracking Number: {{ rental.trackingNumber }}
-            </p>
-          </div>
 
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
+
+  <!-- Cancel Booking Modal -->
+  <div *ngIf="showCancelModal" class="fixed inset-0 z-50">
+    <div
+      class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      (click)="closeCancelModal()"
+    ></div>
+
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div
+          class="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-exclamation-triangle text-xl"></i>
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-800 text-center">Cancel Booking?</h2>
+
+        <p class="text-gray-500 text-center mt-3">
+          Are you sure you want to cancel
+          <span class="font-semibold text-gray-800">
+            {{ selectedRentalToCancel?.bookingNumber }}
+          </span>?
+        </p>
+
+        <!-- Free cancellation — no advance paid yet -->
+        <p
+          *ngIf="selectedRentalToCancel?.paymentStatus === 'PENDING'"
+          class="text-sm text-green-600 text-center mt-2"
+        >
+          <i class="fas fa-check-circle mr-1"></i>
+          Free cancellation — no payment has been made.
+        </p>
+
+        <!-- Advance already paid — non-refundable warning -->
+        <div
+          *ngIf="selectedRentalToCancel?.paymentStatus === 'ADVANCE_PAID'"
+          class="mt-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700"
+        >
+          <p class="font-semibold mb-1">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Advance Payment is Non-Refundable
+          </p>
+          <p>
+            You have already paid an advance of
+            <span class="font-bold">
+              LKR {{ selectedRentalToCancel?.advanceAmount | number }}
+            </span>.
+            This amount will <strong>not be refunded</strong> if you cancel.
+          </p>
+        </div>
+
+
+        <div class="mt-6 flex gap-3">
+          <button
+            type="button"
+            (click)="closeCancelModal()"
+            class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50"
+          >
+            Keep Booking
+          </button>
+          <button
+            type="button"
+            (click)="confirmCancelRental()"
+            class="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700"
+          >
+            Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </section>

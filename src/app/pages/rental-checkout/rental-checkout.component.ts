@@ -20,6 +20,7 @@ interface RentalCartItem {
   totalDays: number;
   totalPrice: number;
   availableUnitsForDates: number;
+
 }
 
 @Component({
@@ -45,6 +46,7 @@ export class RentalCheckoutComponent {
   };
 
   customerNote = '';
+  deliveryMethod: 'DELIVERY' | 'PICKUP' = 'DELIVERY';
 
   constructor(
     private rentalBookingService: RentalBookingService,
@@ -67,17 +69,18 @@ export class RentalCheckoutComponent {
     return this.cart.reduce((sum, item) => sum + item.totalPrice, 0);
   }
 
-  get deliveryCharge(): number {
-    return this.cart.length > 0 ? 1000 : 0;
-  }
+get deliveryCharge(): number {
+  return this.deliveryMethod === 'PICKUP' ? 0 : 1000;
+}
+
 
   get advanceAmount(): number {
     return this.subtotal * 0.5;
   }
 
-  get amountPayNow(): number {
-    return this.advanceAmount + this.deliveryCharge;
-  }
+get amountPayNow(): number {
+  return this.advanceAmount;
+}
 
   get remainingAmount(): number {
     return this.subtotal - this.advanceAmount;
@@ -86,33 +89,41 @@ export class RentalCheckoutComponent {
   placeRentalBooking(): void {
     this.errorMessage = '';
 
-    if (this.cart.length === 0) {
-      this.errorMessage = 'Your rental cart is empty.';
-      return;
-    }
+   if (this.deliveryMethod === 'DELIVERY') {
+  if (
+    !this.address.fullName ||
+    !this.address.phone ||
+    !this.address.addressLine1 ||
+    !this.address.city ||
+    !this.address.district ||
+    !this.address.postalCode
+  ) {
+    this.errorMessage = 'Please fill all required delivery details.';
+    return;
+  }
+}
 
-    if (
-      !this.address.fullName ||
-      !this.address.phone ||
-      !this.address.addressLine1 ||
-      !this.address.city ||
-      !this.address.district ||
-      !this.address.postalCode
-    ) {
-      this.errorMessage = 'Please fill all required delivery details.';
-      return;
-    }
 
-    const request: CreateRentalBookingRequest = {
-      rentalStartDate: this.startDate,
-      rentalEndDate: this.endDate,
-      items: this.cart.map((item) => ({
-        productId: item.id,
-        quantity: item.quantity,
-      })),
-      deliveryAddress: this.address,
-      customerNote: this.customerNote,
-    };
+const request: CreateRentalBookingRequest = {
+  rentalStartDate: this.startDate,
+  rentalEndDate: this.endDate,
+  items: this.cart.map((item) => ({
+    productId: item.id,
+    quantity: item.quantity,
+  })),
+  deliveryAddress: this.deliveryMethod === 'DELIVERY' ? this.address : {
+    fullName: 'PICKUP',
+    phone: '-',
+    addressLine1: 'Store Pickup',
+    addressLine2: '',
+    city: '-',
+    district: '-',
+    postalCode: '-',
+  },
+  customerNote: this.customerNote,
+  deliveryMethod: this.deliveryMethod,
+};
+
 
     this.loading = true;
 
@@ -120,8 +131,6 @@ export class RentalCheckoutComponent {
       next: (booking) => {
         this.paymentService.initRentalPayHerePayment({ bookingId: booking.bookingId }).subscribe({
           next: (payment) => {
-            localStorage.removeItem('rentalCart');
-            window.dispatchEvent(new Event('storage'));
             this.redirectToPayHere(payment);
           },
           error: (err) => {

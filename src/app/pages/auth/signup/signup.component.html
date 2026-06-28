@@ -53,11 +53,6 @@
         <span>{{ errorMessage }}</span>
       </div>
 
-      <!--
-        KEY FIX: (ngSubmit)="signup(signupForm)" — passes the NgForm reference.
-        Old code had (ngSubmit)="signup()" with no argument, so the TypeScript
-        method received undefined and crashed silently, leaving loading=true forever.
-      -->
       <form
         *ngIf="!successMessage"
         (ngSubmit)="signup(signupForm)"

@@ -30,4 +30,17 @@ export class PaymentService {
       request
     );
   }
+
+  confirmOrderPayment(orderId: number): Observable<void> {
+  return this.http.post<void>(
+    `${this.apiUrl}/confirm-order/${orderId}`, {}
+  );
+}
+
+confirmRentalPayment(bookingId: number): Observable<void> {
+  return this.http.post<void>(
+    `${this.apiUrl}/confirm-rental/${bookingId}`, {}
+  );
+}
+
 }

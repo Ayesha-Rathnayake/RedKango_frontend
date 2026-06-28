@@ -6,6 +6,7 @@ import { APP_CONFIG } from '../config/app-config.token';
 import {
   ApiMessage,
   AuthResponse,
+  ChangePasswordRequest,
   ForgotPasswordRequest,
   JwtPayload,
   LoginRequest,
@@ -146,4 +147,5 @@ export class AuthService {
       })
     );
   }
+
 }

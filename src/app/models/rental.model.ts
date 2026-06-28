@@ -28,6 +28,8 @@ export interface CreateRentalBookingRequest {
   }[];
   deliveryAddress: RentalDeliveryAddress;
   customerNote?: string;
+  deliveryMethod: 'DELIVERY' | 'PICKUP';
+
 }
 
 export interface RentalBookingItem {
@@ -60,6 +62,7 @@ export interface RentalBooking {
 
   bookingStatus: string;
   paymentStatus: string;
+    deliveryMethod?: string;
 
   deliveryFullName: string;
   deliveryPhone: string;

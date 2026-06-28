@@ -157,13 +157,24 @@
             </p>
           </div>
 
-          <div class="flex flex-wrap gap-2">
+           <div class="flex flex-wrap gap-2">
             <a
               [routerLink]="['/order-summary', order.orderId]"
               class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold text-sm"
             >
               View Details
             </a>
+
+            <button
+              *ngIf="order.orderStatus === 'PENDING_PAYMENT' && order.paymentStatus === 'PENDING'"
+              type="button"
+              (click)="payNow(order)"
+              [disabled]="payingOrderId === order.orderId"
+              class="px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white font-semibold text-sm flex items-center gap-2"
+            >
+              <i *ngIf="payingOrderId === order.orderId" class="fas fa-spinner fa-spin text-xs"></i>
+              {{ payingOrderId === order.orderId ? 'Processing...' : 'Pay Now' }}
+            </button>
 
             <button
               *ngIf="canCancel(order)"
@@ -173,6 +184,7 @@
             >
               Cancel Order
             </button>
+
 
             <button
               *ngIf="order.orderStatus === 'CANCELLED'"
